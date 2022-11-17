@@ -38,7 +38,7 @@ mjtNum
        typedef float mjtNum;
    #endif
 
-| Defined in `mjtnum.h <https://github.com/deepmind/mujoco/blob/main/include/mjtnum.h>`_
+| Defined in `mjtnum.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjtnum.h>`_
 
 | This is the floating-point type used throughout the simulator. If the symbol ``mjUSEDOUBLE`` is defined in
   ``mjmodel.h``, this type is defined as ``double``, otherwise it is defined as ``float``. Currently only the
@@ -61,7 +61,7 @@ mjtByte
 
    typedef unsigned char mjtByte;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Byte type used to represent boolean variables.
 
@@ -86,11 +86,12 @@ mjtDisableBit
        mjDSBL_FILTERPARENT = 1<<9,     // remove collisions with parent body
        mjDSBL_ACTUATION    = 1<<10,    // apply actuation forces
        mjDSBL_REFSAFE      = 1<<11,    // integrator safety: make ref[0]>=2*timestep
+       mjDSBL_SENSOR       = 1<<12,    // sensors
 
-       mjNDISABLE          = 12        // number of disable flags
+       mjNDISABLE          = 13        // number of disable flags
    } mjtDisableBit;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Constants which are powers of 2. They are used as bitmasks for the field ``disableflags`` of :ref:`mjOption`.
   At runtime this field is ``m->opt.disableflags``. The number of these constants is given by ``mjNDISABLE`` which is
@@ -117,7 +118,7 @@ mjtEnableBit
        mjNENABLE           = 5         // number of enable flags
    } mjtEnableBit;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Constants which are powers of 2. They are used as bitmasks for the field ``enableflags`` of :ref:`mjOption`.
   At runtime this field is ``m->opt.enableflags``. The number of these constants is given by ``mjNENABLE`` which is also
@@ -138,7 +139,7 @@ mjtJoint
        mjJNT_HINGE                     // rotation angle (rad) around body-fixed axis  (1)
    } mjtJoint;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Primitive joint types. These values are used in ``m->jnt_type``. The numbers in the comments indicate how many
   positional coordinates each joint type has. Note that ball joints and rotational components of free joints are
@@ -176,7 +177,7 @@ mjtGeom
        mjGEOM_NONE         = 1001      // missing geom type
    } mjtGeom;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Geometric types supported by MuJoCo. The first group are "official" geom types that can be used in the model. The
   second group are geom types that cannot be used in the model but are used by the visualizer to add decorative
@@ -198,7 +199,7 @@ mjtCamLight
        mjCAMLIGHT_TARGETBODYCOM        // pos fixed in body, rot tracks target subtree com
    } mjtCamLight;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Dynamic modes for cameras and lights, specifying how the camera/light position and orientation are computed. These
   values are used in ``m->cam_mode`` and ``m->light_mode``.
@@ -217,7 +218,7 @@ mjtTexture
        mjTEXTURE_SKYBOX                // cube texture used as skybox
    } mjtTexture;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Texture types, specifying how the texture will be mapped. These values are used in ``m->tex_type``.
 
@@ -232,9 +233,10 @@ mjtIntegrator
    {
        mjINT_EULER         = 0,        // semi-implicit Euler
        mjINT_RK4                       // 4th-order Runge Kutta
+       mjINT_IMPLICIT                  // implicit in velocity
    } mjtIntegrator;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Numerical integrator types. These values are used in ``m->opt.integrator``.
 
@@ -252,7 +254,7 @@ mjtCollision
        mjCOL_DYNAMIC                   // test dynamic pairs only
    } mjtCollision;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Collision modes specifying how candidate geom pairs are generated for near-phase collision checking. These values are
   used in ``m->opt.collision``.
@@ -270,7 +272,7 @@ mjtCone
        mjCONE_ELLIPTIC                 // elliptic
    } mjtCone;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Available friction cone types. These values are used in ``m->opt.cone``.
 
@@ -288,7 +290,7 @@ mjtJacobian
        mjJAC_AUTO                      // dense if nv<=60, sparse otherwise
    } mjtJacobian;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Available Jacobian types. These values are used in ``m->opt.jacobian``.
 
@@ -306,7 +308,7 @@ mjtSolver
        mjSOL_NEWTON                    // Newton (primal)
    } mjtSolver;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Available constraint solver algorithms. These values are used in ``m->opt.solver``.
 
@@ -323,10 +325,10 @@ mjtEq
        mjEQ_WELD,                      // fix relative position and orientation of two bodies
        mjEQ_JOINT,                     // couple the values of two scalar joints with cubic
        mjEQ_TENDON,                    // couple the lengths of two tendons with cubic
-       mjEQ_DISTANCE                   // fix the contact distance betweent two geoms
+       mjEQ_DISTANCE                   // unsupported, will cause an error if used
    } mjtEq;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Equality constraint types. These values are used in ``m->eq_type``.
 
@@ -347,7 +349,7 @@ mjtWrap
        mjWRAP_CYLINDER                 // wrap around (infinite) cylinder
    } mjtWrap;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Tendon wrapping object types. These values are used in ``m->wrap_type``.
 
@@ -369,7 +371,7 @@ mjtTrn
        mjTRN_UNDEFINED     = 1000      // undefined transmission type
    } mjtTrn;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Actuator transmission types. These values are used in ``m->actuator_trntype``.
 
@@ -389,7 +391,7 @@ mjtDyn
        mjDYN_USER                      // user-defined dynamics type
    } mjtDyn;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Actuator dynamics types. These values are used in ``m->actuator_dyntype``.
 
@@ -403,11 +405,12 @@ mjtGain
    typedef enum _mjtGain
    {
        mjGAIN_FIXED        = 0,        // fixed gain
+       mjGAIN_AFFINE,                  // const + kp*length + kv*velocity
        mjGAIN_MUSCLE,                  // muscle FLV curve computed by mju_muscleGain()
        mjGAIN_USER                     // user-defined gain type
    } mjtGain;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Actuator gain types. These values are used in ``m->actuator_gaintype``.
 
@@ -426,7 +429,7 @@ mjtBias
        mjBIAS_USER                     // user-defined bias type
    } mjtBias;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Actuator bias types. These values are used in ``m->actuator_biastype``.
 
@@ -465,7 +468,7 @@ mjtObj
        mjOBJ_KEY                       // keyframe
    } mjtObj;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | MuJoCo object types. These values are used in the support functions :ref:`mj_name2id` and
   :ref:`mj_id2name` to convert between object names and integer ids.
@@ -489,7 +492,7 @@ mjtConstraint
        mjCNSTR_CONTACT_ELLIPTIC        // frictional contact, elliptic friction cone
    } mjtConstraint;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Constraint types. These values are not used in mjModel, but are used in the mjData field ``d->efc_type`` when the list
   of active constraints is constructed at each simulation time step.
@@ -510,7 +513,7 @@ mjtConstraintState
        mjCNSTRSTATE_CONE               // squared distance to cone cost (elliptic contact)
    } mjtConstraintState;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | These values are used by the solver internally to keep track of the constraint states.
 
@@ -543,7 +546,7 @@ mjtSensor
        mjSENS_ACTUATORFRC,             // scalar actuator force
 
        // sensors related to ball joints
-       mjSENS_BALLQUAT,                // 4D ball joint quaterion
+       mjSENS_BALLQUAT,                // 4D ball joint quaternion
        mjSENS_BALLANGVEL,              // 3D ball joint angular velocity
 
        // joint and tendon limit sensors, in constraint space
@@ -574,7 +577,7 @@ mjtSensor
        mjSENS_USER                     // sensor data provided by mjcb_sensor callback
    } mjtSensor;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | Sensor types. These values are used in ``m->sensor_type``.
 
@@ -593,7 +596,7 @@ mjtStage
        mjSTAGE_ACC                     // acceleration/force-dependent computations
    } mjtStage;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | These are the compute stages for the skipstage parameters of :ref:`mj_forwardSkip` and
   :ref:`mj_inverseSkip`.
@@ -613,7 +616,7 @@ mjtDataType
        mjDATATYPE_QUATERNION           // unit quaternion
    } mjtDataType;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | These are the possible sensor data types, used in ``mjData.sensor_datatype``.
 
@@ -638,7 +641,7 @@ mjtWarning
        mjNWARNING                      // number of warnings
    } mjtWarning;
 
-| Defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mjdata.h>`_
+| Defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjdata.h>`_
 
 | Warning types. The number of warning types is given by ``mjNWARNING`` which is also the length of the array
   ``mjData.warning``.
@@ -674,7 +677,7 @@ mjtTimer
        mjNTIMER                        // number of timers
    } mjtTimer;
 
-| Defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mjdata.h>`_
+| Defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjdata.h>`_
 
 | Timer types. The number of timer types is given by ``mjNTIMER`` which is also the length of the array
   ``mjData.timer``, as well as the length of the string array :ref:`mjTIMERSTRING` with timer names.
@@ -694,7 +697,7 @@ mjtCatBit
        mjCAT_ALL           = 7         // select all categories
    } mjtCatBit;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | These are the available categories of geoms in the abstract visualizer. The bitmask can be used in the function
   :ref:`mjr_render` to specify which categories should be rendered.
@@ -717,10 +720,10 @@ mjtMouse
        mjMOUSE_SELECT                  // selection
    } mjtMouse;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | These are the mouse actions that the abstract visualizer recognizes. It is up to the user to intercept mouse events
-  and translate them into these actions, as illustrated in ``simulate.cc``.
+  and translate them into these actions, as illustrated in :ref:`simulate.cc <saSimulate>`.
 
 .. _mjtPertBit:
 
@@ -735,7 +738,7 @@ mjtPertBit
        mjPERT_ROTATE       = 2         // rotation
    } mjtPertBit;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | These bitmasks enable the translational and rotational components of the mouse perturbation. For the regular mouse,
   only one can be enabled at a time. For the 3D mouse (SpaceNavigator) both can be enabled simultaneously. They are used
@@ -756,7 +759,7 @@ mjtCamera
        mjCAMERA_USER                   // user is responsible for setting OpenGL camera
    } mjtCamera;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | These are the possible camera types, used in ``mjvCamera.type``.
 
@@ -787,7 +790,7 @@ mjtLabel
        mjNLABEL                        // number of label types
    } mjtLabel;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | These are the abstract visualization elements that can have text labels. Used in ``mjvOption.label``.
 
@@ -811,7 +814,7 @@ mjtFrame
        mjNFRAME                        // number of visualization frames
    } mjtFrame;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | These are the MuJoCo objects whose spatial frames can be rendered. Used in ``mjvOption.frame``.
 
@@ -850,7 +853,7 @@ mjtVisFlag
        mjNVISFLAG                      // number of visualization flags
    } mjtVisFlag;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | These are indices in the array ``mjvOption.flags``, whose elements enable/disable the visualization of the
   corresponding model or decoration element.
@@ -872,12 +875,13 @@ mjtRndFlag
        mjRND_FOG,                      // fog
        mjRND_HAZE,                     // haze
        mjRND_SEGMENT,                  // segmentation with random color
-       mjRND_IDCOLOR,                  // segmentation with segid color
+       mjRND_IDCOLOR,                  // segmentation with segid+1 color
+       mjRND_CULL_FACE,                // cull backward faces
 
        mjNRNDFLAG                      // number of rendering flags
    } mjtRndFlag;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | These are indices in the array ``mjvScene.flags``, whose elements enable/disable OpenGL rendering effects.
 
@@ -895,7 +899,7 @@ mjtStereo
        mjSTEREO_SIDEBYSIDE             // side-by-side
    } mjtStereo;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | These are the possible stereo rendering types. They are used in ``mjvScene.stereo``.
 
@@ -914,7 +918,7 @@ mjtGridPos
        mjGRID_BOTTOMRIGHT              // bottom right
    } mjtGridPos;
 
-| Defined in `mjrender.h <https://github.com/deepmind/mujoco/blob/main/include/mjrender.h>`_
+| Defined in `mjrender.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjrender.h>`_
 
 | These are the possible grid positions for text overlays. They are used as an argument to the function
   :ref:`mjr_overlay`.
@@ -932,7 +936,7 @@ mjtFramebuffer
        mjFB_OFFSCREEN                  // offscreen buffer
    } mjtFramebuffer;
 
-| Defined in `mjrender.h <https://github.com/deepmind/mujoco/blob/main/include/mjrender.h>`_
+| Defined in `mjrender.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjrender.h>`_
 
 | These are the possible framebuffers. They are used as an argument to the function :ref:`mjr_setBuffer`.
 
@@ -953,7 +957,7 @@ mjtFontScale
        mjFONTSCALE_300     = 300       // 300% scale
    } mjtFontScale;
 
-| Defined in `mjrender.h <https://github.com/deepmind/mujoco/blob/main/include/mjrender.h>`_
+| Defined in `mjrender.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjrender.h>`_
 
 | These are the possible font sizes. The fonts are predefined bitmaps stored in the dynamic library at three different
   sizes.
@@ -972,7 +976,7 @@ mjtFont
        mjFONT_BIG                      // big font (for user alerts)
    } mjtFont;
 
-| Defined in `mjrender.h <https://github.com/deepmind/mujoco/blob/main/include/mjrender.h>`_
+| Defined in `mjrender.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjrender.h>`_
 
 | These are the possible font types.
 
@@ -991,7 +995,7 @@ mjtButton
        mjBUTTON_MIDDLE             // middle button
    } mjtButton;
 
-| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mjui.h>`_
+| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjui.h>`_
 
 | Mouse button IDs used in the UI framework.
 
@@ -1013,7 +1017,7 @@ mjtEvent
        mjEVENT_RESIZE              // resize
    } mjtEvent;
 
-| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mjui.h>`_
+| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjui.h>`_
 
 | Event types used in the UI framework.
 
@@ -1046,7 +1050,7 @@ mjtItem
        mjNITEM                     // number of item types
    } mjtItem;
 
-| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mjui.h>`_
+| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjui.h>`_
 
 | Item types used in the UI framework.
 
@@ -1055,8 +1059,8 @@ mjtItem
 Function types
 ^^^^^^^^^^^^^^
 
-MuJoCo callbacks have corresponding function types. They are defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mjdata.h>`_ and in
-`mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mjui.h>`_. The actual callback functions are documented later.
+MuJoCo callbacks have corresponding function types. They are defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjdata.h>`_ and in
+`mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjui.h>`_. The actual callback functions are documented later.
 
 .. _mjfGeneric:
 
@@ -1163,7 +1167,7 @@ mjVFS
    };
    typedef struct _mjVFS mjVFS;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | This is the data structure with the virtual file system. It can only be constructed programmatically, and does not
   have an analog in MJCF.
@@ -1213,7 +1217,7 @@ mjOption
    };
    typedef struct _mjOption mjOption;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | This is the data structure with simulation options. It corresponds to the MJCF element
   :ref:`option <option>`. One instance of it is embedded in mjModel.
@@ -1229,10 +1233,11 @@ mjVisual
    {
        struct                          // global parameters
        {
-           float fovy;                 // y-field of view (deg) for free camera
+           float fovy;                 // y-field of view for free camera (degrees)
            float ipd;                  // inter-pupilary distance for free camera
            float linewidth;            // line width for wireframe and ray rendering
            float glow;                 // glow coefficient for selected body
+           float realtime;             // initial real-time factor (1: real time)
            int offwidth;               // width of offscreen buffer
            int offheight;              // height of offscreen buffer
        } global;
@@ -1319,7 +1324,7 @@ mjVisual
    };
    typedef struct _mjVisual mjVisual;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | This is the data structure with abstract visualization options. It corresponds to the MJCF element
   :ref:`visual <visual>`. One instance of it is embedded in mjModel.
@@ -1341,7 +1346,7 @@ mjStatistic
    };
    typedef struct _mjStatistic mjStatistic;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | This is the data structure with model statistics precomputed by the compiler or set by the user. It corresponds to the
   MJCF element :ref:`statistic <statistic>`. One instance of it is embedded in mjModel.
@@ -1398,6 +1403,8 @@ mjModel
        int ntupledata;                 // number of objects in all tuple fields
        int nkey;                       // number of keyframes
        int nmocap;                     // number of mocap bodies
+       int nplugin;                    // number of plugin instances
+       int npluginattr;                // number of chars in all plugin config attributes
        int nuser_body;                 // number of mjtNums in body_user
        int nuser_jnt;                  // number of mjtNums in jnt_user
        int nuser_geom;                 // number of mjtNums in geom_user
@@ -1410,12 +1417,14 @@ mjModel
 
        // sizes set after mjModel construction (only affect mjData)
        int nM;                         // number of non-zeros in sparse inertia matrix
+       int nD;                         // number of non-zeros in sparse derivative matrix
        int nemax;                      // number of potential equality-constraint rows
        int njmax;                      // number of available rows in constraint Jacobian
        int nconmax;                    // number of potential contacts in contact list
        int nstack;                     // number of fields in mjData stack
        int nuserdata;                  // number of extra fields in mjData
        int nsensordata;                // number of fields in sensor data vector
+       int npluginstate;               // number of fields in the plugin state vector
 
        int nbuffer;                    // number of bytes in buffer
 
@@ -1455,7 +1464,9 @@ mjModel
        mjtNum*   body_subtreemass;     // mass of subtree starting at this body    (nbody x 1)
        mjtNum*   body_inertia;         // diagonal inertia in ipos/iquat frame     (nbody x 3)
        mjtNum*   body_invweight0;      // mean inv inert in qpos0 (trn, rot)       (nbody x 2)
+       mjtNum*   body_gravcomp;        // antigravity force, units of body weight  (nbody x 1)
        mjtNum*   body_user;            // user data                                (nbody x nuser_body)
+       int*      body_plugin;          // plugin instance id (-1 if not in use)    (nbody x 1)
 
        // joints
        int*      jnt_type;             // type of joint (mjtJoint)                 (njnt x 1)
@@ -1563,7 +1574,7 @@ mjModel
        int*      mesh_faceadr;         // first face address                       (nmesh x 1)
        int*      mesh_facenum;         // number of faces                          (nmesh x 1)
        int*      mesh_graphadr;        // graph data address; -1: no graph         (nmesh x 1)
-       float*    mesh_vert;            // vertex positions for all meshe           (nmeshvert x 3)
+       float*    mesh_vert;            // vertex positions for all meshes          (nmeshvert x 3)
        float*    mesh_normal;          // vertex normals for all meshes            (nmeshvert x 3)
        float*    mesh_texcoord;        // vertex texcoords for all meshes          (nmeshtexvert x 2)
        int*      mesh_face;            // triangle face data                       (nmeshface x 3)
@@ -1571,6 +1582,7 @@ mjModel
 
        // skins
        int*      skin_matid;           // skin material id; -1: none               (nskin x 1)
+       int*      skin_group;           // group for visibility                     (nskin x 1)
        float*    skin_rgba;            // skin rgba                                (nskin x 4)
        float*    skin_inflate;         // inflate skin in normal direction         (nskin x 1)
        int*      skin_vertadr;         // first vertex address                     (nskin x 1)
@@ -1654,7 +1666,7 @@ mjModel
        mjtNum*   tendon_stiffness;     // stiffness coefficient                    (ntendon x 1)
        mjtNum*   tendon_damping;       // damping coefficient                      (ntendon x 1)
        mjtNum*   tendon_frictionloss;  // loss due to friction                     (ntendon x 1)
-       mjtNum*   tendon_lengthspring;  // tendon length in qpos_spring             (ntendon x 1)
+       mjtNum*   tendon_lengthspring;  // spring resting length range              (ntendon x 2)
        mjtNum*   tendon_length0;       // tendon length in qpos0                   (ntendon x 1)
        mjtNum*   tendon_invweight0;    // inv. weight in qpos0                     (ntendon x 1)
        mjtNum*   tendon_user;          // user data                                (ntendon x nuser_tendon)
@@ -1671,20 +1683,25 @@ mjModel
        int*      actuator_gaintype;    // gain type (mjtGain)                      (nu x 1)
        int*      actuator_biastype;    // bias type (mjtBias)                      (nu x 1)
        int*      actuator_trnid;       // transmission id: joint, tendon, site     (nu x 2)
+       int*      actuator_actadr;      // first activation address; -1: stateless  (nu x 1)
+       int*      actuator_actnum;      // number of activation variables           (nu x 1)
        int*      actuator_group;       // group for visibility                     (nu x 1)
        mjtByte*  actuator_ctrllimited; // is control limited                       (nu x 1)
        mjtByte*  actuator_forcelimited;// is force limited                         (nu x 1)
+       mjtByte*  actuator_actlimited;  // is activation limited                    (nu x 1)
        mjtNum*   actuator_dynprm;      // dynamics parameters                      (nu x mjNDYN)
        mjtNum*   actuator_gainprm;     // gain parameters                          (nu x mjNGAIN)
        mjtNum*   actuator_biasprm;     // bias parameters                          (nu x mjNBIAS)
        mjtNum*   actuator_ctrlrange;   // range of controls                        (nu x 2)
        mjtNum*   actuator_forcerange;  // range of forces                          (nu x 2)
+       mjtNum*   actuator_actrange;    // range of activations                     (nu x 2)
        mjtNum*   actuator_gear;        // scale length and transmitted force       (nu x 6)
        mjtNum*   actuator_cranklength; // crank length for slider-crank            (nu x 1)
        mjtNum*   actuator_acc0;        // acceleration from unit force in qpos0    (nu x 1)
        mjtNum*   actuator_length0;     // actuator length in qpos0                 (nu x 1)
        mjtNum*   actuator_lengthrange; // feasible actuator length range           (nu x 2)
        mjtNum*   actuator_user;        // user data                                (nu x nuser_actuator)
+       int*      actuator_plugin;      // plugin instance id; -1: not a plugin     (nu x 1)
 
        // sensors
        int*      sensor_type;          // sensor type (mjtSensor)                  (nsensor x 1)
@@ -1699,6 +1716,14 @@ mjModel
        mjtNum*   sensor_cutoff;        // cutoff for real and positive; 0: ignore  (nsensor x 1)
        mjtNum*   sensor_noise;         // noise standard deviation                 (nsensor x 1)
        mjtNum*   sensor_user;          // user data                                (nsensor x nuser_sensor)
+       int*      sensor_plugin;        // plugin instance id; -1: not a plugin     (nsensor x 1)
+
+       // plugin instances
+       int*      plugin;               // globally registered plugin slot number   (nplugin x 1)
+       int*      plugin_stateadr;      // address in the plugin state array        (nplugin x 1)
+       int*      plugin_statenum;      // number of states in the plugin instance  (nplugin x 1)
+       char*     plugin_attr;          // config attributes of plugin instances    (npluginattr x 1)
+       int*      plugin_attradr;       // address to each instance's config attrib (nplugin x 1)
 
        // custom numeric fields
        int*      numeric_adr;          // address of field in numeric_data         (nnumeric x 1)
@@ -1724,6 +1749,7 @@ mjModel
        mjtNum*   key_act;              // key activation                           (nkey x na)
        mjtNum*   key_mpos;             // key mocap position                       (nkey x 3*nmocap)
        mjtNum*   key_mquat;            // key mocap quaternion                     (nkey x 4*nmocap)
+       mjtNum*   key_ctrl;             // key control                              (nkey x nu)
 
        // names
        int*      name_bodyadr;         // body name pointers                       (nbody x 1)
@@ -1747,11 +1773,12 @@ mjModel
        int*      name_textadr;         // text name pointers                       (ntext x 1)
        int*      name_tupleadr;        // tuple name pointers                      (ntuple x 1)
        int*      name_keyadr;          // keyframe name pointers                   (nkey x 1)
+       int*      name_pluginadr;       // plugin instance name pointers            (nplugin x 1)
        char*     names;                // names of all objects, 0-terminated       (nnames x 1)
    };
    typedef struct _mjModel mjModel;
 
-| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h>`_
+| Defined in `mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h>`_
 
 | This is the main data structure holding the MuJoCo model. It is treated as constant by the simulator.
 
@@ -1792,7 +1819,7 @@ mjContact
    };
    typedef struct _mjContact mjContact;
 
-| Defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mjdata.h>`_
+| Defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjdata.h>`_
 
 | This is the data structure holding information about one contact. ``mjData.contact`` is a preallocated array of
   mjContact data structures, populated at runtime with the contacts found by the collision detector. Additional contact
@@ -1812,7 +1839,7 @@ mjWarningStat
    };
    typedef struct _mjWarningStat mjWarningStat;
 
-| Defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mjdata.h>`_
+| Defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjdata.h>`_
 
 | This is the data structure holding information about one warning type. ``mjData.warning`` is a preallocated array of
   mjWarningStat data structures, one for each warning type.
@@ -1831,7 +1858,7 @@ mjTimerStat
    };
    typedef struct _mjTimerStat mjTimerStat;
 
-| Defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mjdata.h>`_
+| Defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjdata.h>`_
 
 | This is the data structure holding information about one timer. ``mjData.timer`` is a preallocated array of
   mjTimerStat data structures, one for each timer type.
@@ -1855,7 +1882,7 @@ mjSolverStat
    };
    typedef struct _mjSolverStat mjSolverStat;
 
-| Defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mjdata.h>`_
+| Defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjdata.h>`_
 
 | This is the data structure holding information about one solver iteration. ``mjData.solver`` is a preallocated array
   of mjSolverStat data structures, one for each iteration of the solver, up to a maximum of mjNSOLVER. The actual number
@@ -2042,11 +2069,11 @@ mjData
        mjtNum*   qfrc_actuator;        // actuator force                           (nv x 1)
 
        // computed by mj_fwdAcceleration
-       mjtNum*   qfrc_unc;             // net unconstrained force                  (nv x 1)
-       mjtNum*   qacc_unc;             // unconstrained acceleration               (nv x 1)
+       mjtNum*   qfrc_smooth;          // net unconstrained force                  (nv x 1)
+       mjtNum*   qacc_smooth;          // unconstrained acceleration               (nv x 1)
 
        // computed by mj_fwdConstraint/mj_inverse
-       mjtNum*   efc_b;                // linear cost term: J*qacc_unc - aref      (njmax x 1)
+       mjtNum*   efc_b;                // linear cost term: J*qacc_smooth - aref   (njmax x 1)
        mjtNum*   efc_force;            // constraint force in constraint space     (njmax x 1)
        int*      efc_state;            // constraint state (mjtConstraintState)    (njmax x 1)
        mjtNum*   qfrc_constraint;      // constraint force                         (nv x 1)
@@ -2062,7 +2089,7 @@ mjData
    };
    typedef struct _mjData mjData;
 
-| Defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mjdata.h>`_
+| Defined in `mjdata.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjdata.h>`_
 
 | This is the main data structure holding the simulation state. It is the workspace where all functions read their
   modifiable inputs and write their outputs.
@@ -2086,7 +2113,7 @@ mjvPerturb
    };
    typedef struct _mjvPerturb mjvPerturb;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | This is the data structure holding information about mouse perturbations.
 
@@ -2112,7 +2139,7 @@ mjvCamera
    };
    typedef struct _mjvCamera mjvCamera;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | This is the data structure describing one abstract camera.
 
@@ -2139,7 +2166,7 @@ mjvGLCamera
    };
    typedef struct _mjvGLCamera mjvGLCamera;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | This is the data structure describing one OpenGL camera.
 
@@ -2182,7 +2209,7 @@ mjvGeom
    };
    typedef struct _mjvGeom mjvGeom;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | This is the data structure describing one abstract visualization geom - which could correspond to a model geom or to a
   decoration element constructed by the visualizer.
@@ -2210,7 +2237,7 @@ mjvLight
    };
    typedef struct _mjvLight mjvLight;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | This is the data structure describing one OpenGL light.
 
@@ -2221,20 +2248,21 @@ mjvOption
 
 .. code-block:: C
 
-   struct _mjvOption                   // abstract visualization options
+   struct _mjvOption                      // abstract visualization options
    {
-       int      label;                 // what objects to label (mjtLabel)
-       int      frame;                 // which frame to show (mjtFrame)
-       mjtByte  geomgroup[mjNGROUP];   // geom visualization by group
-       mjtByte  sitegroup[mjNGROUP];   // site visualization by group
-       mjtByte  jointgroup[mjNGROUP];  // joint visualization by group
+       int      label;                    // what objects to label (mjtLabel)
+       int      frame;                    // which frame to show (mjtFrame)
+       mjtByte  geomgroup[mjNGROUP];      // geom visualization by group
+       mjtByte  sitegroup[mjNGROUP];      // site visualization by group
+       mjtByte  jointgroup[mjNGROUP];     // joint visualization by group
        mjtByte  tendongroup[mjNGROUP];    // tendon visualization by group
        mjtByte  actuatorgroup[mjNGROUP];  // actuator visualization by group
-       mjtByte  flags[mjNVISFLAG];     // visualization flags (indexed by mjtVisFlag)
+       mjtByte  skingroup[mjNGROUP];      // skin visualization by group
+       mjtByte  flags[mjNVISFLAG];        // visualization flags (indexed by mjtVisFlag)
    };
    typedef struct _mjvOption mjvOption;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | This structure contains options that enable and disable the visualization of various elements.
 
@@ -2280,7 +2308,7 @@ mjvScene
    };
    typedef struct _mjvScene mjvScene;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | This structure contains everything needed to render the 3D scene in OpenGL.
 
@@ -2334,7 +2362,7 @@ mjvFigure
    };
    typedef struct _mjvFigure mjvFigure;
 
-| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mjvisualize.h>`_
+| Defined in `mjvisualize.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjvisualize.h>`_
 
 | This structure contains everything needed to render a 2D plot in OpenGL. The buffers for line points etc. are
   preallocated, and the user has to populate them before calling the function :ref:`mjr_figure` with this
@@ -2356,7 +2384,7 @@ mjrRect
    };
    typedef struct _mjrRect mjrRect;
 
-| Defined in `mjrender.h (57) <https://github.com/deepmind/mujoco/blob/main/include/mjrender.h#L57>`_
+| Defined in `mjrender.h (57) <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjrender.h#L57>`_
 
 | This structure specifies a rectangle.
 
@@ -2451,7 +2479,7 @@ mjrContext
    };
    typedef struct _mjrContext mjrContext;
 
-| Defined in `mjrender.h (67) <https://github.com/deepmind/mujoco/blob/main/include/mjrender.h#L67>`_
+| Defined in `mjrender.h (67) <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjrender.h#L67>`_
 
 | This structure contains the custom OpenGL rendering context, with the ids of all OpenGL resources uploaded to the GPU.
 
@@ -2502,7 +2530,7 @@ mjuiState
    };
    typedef struct _mjuiState mjuiState;
 
-| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mjui.h>`_
+| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjui.h>`_
 
 | This structure contains the keyboard and mouse state used by the UI framework.
 
@@ -2529,7 +2557,7 @@ mjuiThemeSpacing
    };
    typedef struct _mjuiThemeSpacing mjuiThemeSpacing;
 
-| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mjui.h>`_
+| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjui.h>`_
 
 | This structure defines the spacing of UI items in the theme.
 
@@ -2566,7 +2594,7 @@ mjuiThemeColor
    };
    typedef struct _mjuiThemeColor mjuiThemeColor;
 
-| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mjui.h>`_
+| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjui.h>`_
 
 | This structure defines the colors of UI items in the theme.
 
@@ -2624,7 +2652,7 @@ mjuiItem
    };
    typedef struct _mjuiItem mjuiItem;
 
-| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mjui.h>`_
+| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjui.h>`_
 
 | This structure defines one UI item.
 
@@ -2651,7 +2679,7 @@ mjuiSection
    };
    typedef struct _mjuiSection mjuiSection;
 
-| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mjui.h>`_
+| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjui.h>`_
 
 | This structure defines one section of the UI.
 
@@ -2698,7 +2726,7 @@ mjUI
    };
    typedef struct _mjUI mjUI;
 
-| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mjui.h>`_
+| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjui.h>`_
 
 | This structure defines the entire UI.
 
@@ -2719,7 +2747,7 @@ mjuiDef
    };
    typedef struct _mjuiDef mjuiDef;
 
-| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mjui.h>`_
+| Defined in `mjui.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjui.h>`_
 
 | This structure defines one entry in the definition table used for simplified UI construction.
 
@@ -2729,10 +2757,10 @@ X Macros
 ^^^^^^^^
 
 The X Macros are not needed in most user projects. They are used internally to allocate the model, and are also
-available for users who know how to use this programming technique. See the header file
-`mjxmacro.h <https://github.com/deepmind/mujoco/blob/main/include/mjxmacro.h>`_ for the actual definitions. They are particularly useful in writing MuJoCo wrappers
-for scripting languages, where dynamic structures matching the MuJoCo data structures need to be constructed
-programmatically.
+available for users who know how to use this programming technique. See the header file `mjxmacro.h
+<https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjxmacro.h>`_ for the actual definitions. They are
+particularly useful in writing MuJoCo wrappers for scripting languages, where dynamic structures matching the MuJoCo
+data structures need to be constructed programmatically.
 
 .. _MJOPTION_SCALARS:
 
@@ -2954,9 +2982,9 @@ mjcb_time
    extern mjfTime mjcb_time;
 
 Installing this callback enables the built-in profiler, and keeps timing statistics in ``mjData.timer``. The return type
-is mjtNum, while the time units are up to the user. ``simulate.cc`` assumes the unit is 1 millisecond. In order to be
-useful, the callback should use high-resolution timers with at least microsecond precision. This is because the
-computations being timed are very fast.
+is mjtNum, while the time units are up to the user. :ref:`simulate.cc <saSimulate>` assumes the unit is 1 millisecond.
+In order to be useful, the callback should use high-resolution timers with at least microsecond precision. This is
+because the computations being timed are very fast.
 
 .. _mjcb_act_dyn:
 
@@ -3023,8 +3051,8 @@ String constants
 ^^^^^^^^^^^^^^^^
 
 The string constants described here are provided for user convenience. They correspond to the English names of lists of
-options, and can be displayed in menus or dialogs in a GUI. The code sample :ref:`saSimulate` illustrates how they can
-be used.
+options, and can be displayed in menus or dialogs in a GUI. The code sample :ref:`simulate.cc <saSimulate>` illustrates
+how they can be used.
 
 .. _mjDISABLESTRING:
 
@@ -3098,7 +3126,7 @@ mjVISSTRING
 | [1]: the string "0" or "1" indicating if the flag is on or off by default, as set by
   :ref:`mjv_defaultOption`;
 
-| [2]: one-character string with a suggested keyboard shortcut, used in ``simulate.cc``.
+| [2]: one-character string with a suggested keyboard shortcut, used in :ref:`simulate.cc <saSimulate>`.
 
 .. _mjRNDSTRING:
 
@@ -3157,12 +3185,12 @@ Numeric constants
 +------------------+--------+----------------------------------------------------------------------------------------+
 | mjMAXVFSNAME     | 100    | The maximal number of characters in the name of each file in the virtual file system.  |
 +------------------+--------+----------------------------------------------------------------------------------------+
-| mjNEQDATA        | 7      | The maximal number of real-valued parameters used to define each equality constraint.  |
+| mjNEQDATA        | 11     | The maximal number of real-valued parameters used to define each equality constraint.  |
 |                  |        | Determines the size of mjModel.eq_data. This and the next five constants correspond to |
 |                  |        | array sizes which we have not fully settled. There may be reasons to increase them in  |
 |                  |        | the future, so as to accommodate extra parameters needed for more elaborate            |
 |                  |        | computations. This is why we maintain them as symbolic constants that can be easily    |
-|                  |        | changed, as opposed to the array size for representing quaterions for example - which  |
+|                  |        | changed, as opposed to the array size for representing quaternions for example - which |
 |                  |        | has no reason to change.                                                               |
 +------------------+--------+----------------------------------------------------------------------------------------+
 | mjNDYN           | 10     | The maximal number of real-valued parameters used to define the activation dynamics of |
@@ -3231,18 +3259,18 @@ Numeric constants
 API functions
 -------------
 
-The main header `mujoco.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco.h>`_ exposes a very large number
-of functions. However the functions that most users are likely to need are a small fraction. For example,
-``simulate.cc`` which is as elaborate as a MuJoCo application is likely to get, calls around 40 of these functions,
-while ``basic.cc`` calls around 20. The rest are explosed just in case someone has a use for them. This includes us as
-users of MuJoCo -- we do our own work with the public library instead of relying on internal builds.
+The main header `mujoco.h <https://github.com/deepmind/mujoco/blob/main/include/mujoco/mujoco.h>`_ exposes a very large
+number of functions. However the functions that most users are likely to need are a small fraction. For example,
+:ref:`simulate.cc <saSimulate>` which is as elaborate as a MuJoCo application is likely to get, calls around 40 of these
+functions, while ``basic.cc`` calls around 20. The rest are explosed just in case someone has a use for them. This
+includes us as users of MuJoCo -- we do our own work with the public library instead of relying on internal builds.
 
 .. _Activation:
 
 Activation
 ^^^^^^^^^^
 
-The functions in this section are maintained for backward compatibillity with the now-removed activation mechanism.
+The functions in this section are maintained for backward compatibility with the now-removed activation mechanism.
 
 .. _mj_activate:
 
@@ -3863,7 +3891,7 @@ mj_fwdAcceleration
 
    void mj_fwdAcceleration(const mjModel* m, mjData* d);
 
-Add up all non-constraint forces, compute qacc_unc.
+Add up all non-constraint forces, compute qacc_smooth.
 
 .. _mj_fwdConstraint:
 
@@ -4180,6 +4208,8 @@ mj_rnePostConstraint
 
 RNE with complete data: compute cacc, cfrc_ext, cfrc_int.
 
+.. _mj_collision:
+
 mj_collision
 ~~~~~~~~~~~~
 
@@ -4354,6 +4384,17 @@ mj_jacBodyCom
                       mjtNum* jacp, mjtNum* jacr, int body);
 
 Compute body center-of-mass end-effector Jacobian.
+
+.. _mj_jacSubtreeCom:
+
+mj_jacSubtreeCom
+~~~~~~~~~~~~~~~~
+
+.. code-block:: C
+
+   void mj_jacSubtreeCom(const mjModel* m, mjData* d, mjtNum* jacp, int body);
+
+Compute subtree center-of-mass end-effector Jacobian. ``jacp`` is 3 x nv.
 
 .. _mj_jacGeom:
 
@@ -4549,7 +4590,7 @@ mj_normalizeQuat
 
    void mj_normalizeQuat(const mjModel* m, mjtNum* qpos);
 
-Normalize all quaterions in qpos-type vector.
+Normalize all quaternions in qpos-type vector.
 
 .. _mj_local2Global:
 
@@ -4695,7 +4736,7 @@ Interaction
 ^^^^^^^^^^^
 
 These function implement abstract mouse interactions, allowing control over cameras and perturbations. Their use is well
-illustrated in ``simulate.cc``.
+illustrated in :ref:`simulate.cc <saSimulate>`.
 
 .. _mjv_defaultCamera:
 
@@ -4707,6 +4748,17 @@ mjv_defaultCamera
    void mjv_defaultCamera(mjvCamera* cam);
 
 Set default camera.
+
+.. _mjv_defaultFreeCamera:
+
+mjv_defaultFreeCamera
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: C
+
+   void mjv_defaultFreeCamera(const mjModel* m, mjvCamera* cam);
+
+Set default free camera.
 
 .. _mjv_defaultPerturb:
 
@@ -4887,7 +4939,7 @@ This function is used for mouse selection. Previously selection was done via Ope
 ray intersections which are much more efficient. aspectratio is the viewport width/height. relx and rely are the
 relative coordinates of the 2D point of interest in the viewport (usually mouse cursor). The function returns the id of
 the geom under the specified 2D point, or -1 if there is no geom (note that they skybox if present is not a model geom).
-The 3D coordinates of the clicked point are returned in selpnt. See ``simulate.cc`` for an illustration.
+The 3D coordinates of the clicked point are returned in selpnt. See :ref:`simulate.cc <saSimulate>` for an illustration.
 
 .. _Visualization-api:
 
@@ -4896,7 +4948,7 @@ Visualization
 
 The functions in this section implement abstract visualization. The results are used by the OpenGL rendered, and can
 also be used by users wishing to implement their own rendered, or hook up MuJoCo to advanced rendering tools such as
-Unity or Unreal Engine. See ``simulate.cc`` for illustration of how to use these functions.
+Unity or Unreal Engine. See :ref:`simulate.cc <saSimulate>` for illustration of how to use these functions.
 
 .. _mjv_defaultOption:
 
@@ -5041,7 +5093,8 @@ Update skins.
 OpenGL rendering
 ^^^^^^^^^^^^^^^^
 
-These functions expose the OpenGL renderer. See ``simulate.cc`` for illustration of how to use these functions.
+These functions expose the OpenGL renderer. See :ref:`simulate.cc <saSimulate>` for an illustration
+of how to use these functions.
 
 .. _mjr_defaultContext:
 
@@ -5501,7 +5554,7 @@ mju_malloc
 
    void* mju_malloc(size_t size);
 
-Allocate memory; byte-align on 8; pad size to multiple of 8.
+Allocate memory; byte-align on 64; pad size to multiple of 64.
 
 .. _mju_free:
 
@@ -5859,6 +5912,17 @@ mju_zero
 
 Set res = 0.
 
+.. _mju_fill:
+
+mju_fill
+~~~~~~~~
+
+.. code-block:: C
+
+   void mju_fill(mjtNum* res, mjtNum val, int n);
+
+Set res = val.
+
 mju_copy
 ~~~~~~~~
 
@@ -6012,6 +6076,17 @@ mju_mulMatTVec
 
 Multiply transposed matrix and vector: res = mat' \* vec.
 
+.. _mju_mulVecMatVec:
+
+mju_mulVecMatVec
+~~~~~~~~~~~~~~~~
+
+.. code-block:: C
+
+   mjtNum mju_mulVecMatVec(const mjtNum* vec1, const mjtNum* mat, const mjtNum* vec2, int n);
+
+Multiply square matrix with vectors on both sides: return vec1' \* mat \* vec2.
+
 mju_transpose
 ~~~~~~~~~~~~~
 
@@ -6020,6 +6095,28 @@ mju_transpose
    void mju_transpose(mjtNum* res, const mjtNum* mat, int nr, int nc);
 
 Transpose matrix: res = mat'.
+
+.. _mju_symmetrize:
+
+mju_symmetrize
+~~~~~~~~~~~~~~
+
+.. code-block:: C
+
+   void mju_symmetrize(mjtNum* res, const mjtNum* mat, int n);
+
+Symmetrize square matrix :math:`R = \frac{1}{2}(M + M^T)`.
+
+.. _mju_eye:
+
+mju_eye
+~~~~~~~
+
+.. code-block:: C
+
+   void mju_eye(mjtNum* mat, int n);
+
+Set mat to the identity matrix.
 
 .. _mju_mulMatMat:
 
@@ -6118,7 +6215,7 @@ mju_mulQuat
 
    void mju_mulQuat(mjtNum res[4], const mjtNum quat1[4], const mjtNum quat2[4]);
 
-Muiltiply quaternions.
+Multiply quaternions.
 
 .. _mju_mulQuatAxis:
 
@@ -6129,7 +6226,7 @@ mju_mulQuatAxis
 
    void mju_mulQuatAxis(mjtNum res[4], const mjtNum quat[4], const mjtNum axis[3]);
 
-Muiltiply quaternion and axis.
+Multiply quaternion and axis.
 
 .. _mju_axisAngle2Quat:
 
@@ -6184,7 +6281,7 @@ mju_mat2Quat
 
    void mju_mat2Quat(mjtNum quat[4], const mjtNum mat[9]);
 
-Convert 3D rotation matrix to quaterion.
+Convert 3D rotation matrix to quaternion.
 
 .. _mju_derivQuat:
 
@@ -6206,7 +6303,7 @@ mju_quatIntegrate
 
    void mju_quatIntegrate(mjtNum quat[4], const mjtNum vel[3], mjtNum scale);
 
-Integrate quaterion given 3D angular velocity.
+Integrate quaternion given 3D angular velocity.
 
 .. _mju_quatZ2Vec:
 
@@ -6307,6 +6404,63 @@ mju_eig3
    int mju_eig3(mjtNum[3] eigval, mjtNum[9] eigvec, mjtNum[4] quat, const mjtNum[9] mat);
 
 Eigenvalue decomposition of symmetric 3x3 matrix.
+
+.. _mju_boxQP:
+
+mju_boxQP
+~~~~~~~~~
+
+.. code-block:: C
+
+   int mju_boxQP(mjtNum* res, mjtNum* R, int* index, const mjtNum* H, const mjtNum* g, int n,
+                 const mjtNum* lower, const mjtNum* upper);
+
+Minimize :math:`\tfrac{1}{2} x^T H x + x^T g \quad \text{s.t.} \quad l \le x \le u`, return rank or -1 if failed.
+
+inputs:
+  ``n``           - problem dimension
+
+  ``H``           - SPD matrix                ``n*n``
+
+  ``g``           - bias vector               ``n``
+
+  ``lower``       - lower bounds              ``n``
+
+  ``upper``       - upper bounds              ``n``
+
+  ``res``         - solution warmstart        ``n``
+
+return value:
+  ``nfree <= n``  - rank of unconstrained subspace, -1 if failure
+
+outputs (required):
+  ``res``         - solution                  ``n``
+
+  ``R``           - subspace Cholesky factor  ``nfree*nfree``,    allocated: ``n*(n+7)``
+
+outputs (optional):
+  ``index``       - set of free dimensions    ``nfree``,          allocated: ``n``
+
+notes:
+  The initial value of ``res`` is used to warmstart the solver.
+  ``R`` must have allocatd size ``n*(n+7)``, but only ``nfree*nfree`` values are used in output.
+  ``index`` (if given) must have allocated size ``n``, but only ``nfree`` values are used in output.
+  The convenience function :ref:`mju_boxQPmalloc` allocates the required data structures.
+  Only the lower triangles of H and R and are read from and written to, respectively.
+
+.. _mju_boxQPmalloc:
+
+mju_boxQPmalloc
+~~~~~~~~~~~~~~~
+
+.. code-block:: C
+
+   void mju_boxQPmalloc(mjtNum** res, mjtNum** R, int** index, mjtNum** H, mjtNum** g, int n,
+                        mjtNum** lower, mjtNum** upper);
+
+Allocate heap memory for box-constrained Quadratic Program.
+As in :ref:`mju_boxQP`, ``index``, ``lower``, and ``upper`` are optional.
+Free all pointers with ``mju_free()``.
 
 .. _Miscellaneous:
 
@@ -6445,6 +6599,17 @@ mju_str2Type
 
 Convert type name to type id (mjtObj).
 
+.. _mju_writeNumBytes:
+
+mju_writeNumBytes
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: C
+
+   const char* mju_writeNumBytes(const int nbytes);
+
+Construct a human readable number of bytes using standard letter suffix.
+
 .. _mju_warningText:
 
 mju_warningText
@@ -6575,6 +6740,18 @@ mju_sigmoid
    mjtNum mju_sigmoid(mjtNum x);
 
 Sigmoid function over 0<=x<=1 constructed from half-quadratics.
+
+.. _mjd_transitionFD:
+
+mjd_transitionFD
+~~~~~~~~~~~~~~~~
+
+.. code-block:: C
+
+   void mjd_transitionFD(const mjModel* m, mjData* d, mjtNum eps, mjtByte centered, mjtNum* A, mjtNum* B);
+
+Finite differenced state-transition and control-transition matrices dx(t+h) = A*dx(t) + B*du(t). Required output matrix
+dimensions: A: (2*nv+na x 2*nv+na), B: (2*nv+na x nu).
 
 .. _Macros:
 

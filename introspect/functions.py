@@ -998,7 +998,7 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
                  ),
              ),
          ),
-         doc='Compute actuator force qfrc_actuation.',
+         doc='Compute actuator force qfrc_actuator.',
      )),
     ('mj_fwdAcceleration',
      FunctionDecl(
@@ -2010,6 +2010,36 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
          ),
          doc='Compute body center-of-mass end-effector Jacobian.',
      )),
+    ('mj_jacSubtreeCom',
+     FunctionDecl(
+         name='mj_jacSubtreeCom',
+         return_type=ValueType(name='void'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='m',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjModel', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='d',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjData'),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='jacp',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum'),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='body',
+                 type=ValueType(name='int'),
+             ),
+         ),
+         doc='Compute subtree center-of-mass end-effector Jacobian.',
+     )),
     ('mj_jacGeom',
      FunctionDecl(
          name='mj_jacGeom',
@@ -2558,7 +2588,7 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
                  ),
              ),
          ),
-         doc='Normalize all quaterions in qpos-type vector.',
+         doc='Normalize all quaternions in qpos-type vector.',
      )),
     ('mj_local2Global',
      FunctionDecl(
@@ -2641,6 +2671,64 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
              ),
          ),
          doc='Scale body masses and inertias to achieve specified total mass.',
+     )),
+    ('mj_getPluginConfig',
+     FunctionDecl(
+         name='mj_getPluginConfig',
+         return_type=PointerType(
+             inner_type=ValueType(name='char', is_const=True),
+         ),
+         parameters=(
+             FunctionParameterDecl(
+                 name='m',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjModel', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='plugin_id',
+                 type=ValueType(name='int'),
+             ),
+             FunctionParameterDecl(
+                 name='attrib',
+                 type=PointerType(
+                     inner_type=ValueType(name='char', is_const=True),
+                 ),
+             ),
+         ),
+         doc='Return a config attribute value of a plugin instance; NULL: invalid plugin instance ID or attribute name',  # pylint: disable=line-too-long
+     )),
+    ('mj_loadPluginLibrary',
+     FunctionDecl(
+         name='mj_loadPluginLibrary',
+         return_type=ValueType(name='void'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='path',
+                 type=PointerType(
+                     inner_type=ValueType(name='char', is_const=True),
+                 ),
+             ),
+         ),
+         doc='Load a dynamic library. The dynamic library is assumed to register one or more plugins.',  # pylint: disable=line-too-long
+     )),
+    ('mj_loadAllPluginLibraries',
+     FunctionDecl(
+         name='mj_loadAllPluginLibraries',
+         return_type=ValueType(name='void'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='directory',
+                 type=PointerType(
+                     inner_type=ValueType(name='char', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='callback',
+                 type=ValueType(name='mjfPluginLibraryLoadCallback'),
+             ),
+         ),
+         doc='Scan a directory and load all dynamic libraries. Dynamic libraries in the specified directory are assumed to register one or more plugins. Optionally, if a callback is specified, it is called for each dynamic library encountered that registers plugins.',  # pylint: disable=line-too-long
      )),
     ('mj_version',
      FunctionDecl(
@@ -2898,6 +2986,26 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
              ),
          ),
          doc='Set default camera.',
+     )),
+    ('mjv_defaultFreeCamera',
+     FunctionDecl(
+         name='mjv_defaultFreeCamera',
+         return_type=ValueType(name='void'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='m',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjModel', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='cam',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjvCamera'),
+                 ),
+             ),
+         ),
+         doc='Set default free camera.',
      )),
     ('mjv_defaultPerturb',
      FunctionDecl(
@@ -4659,7 +4767,7 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
                  type=ValueType(name='size_t'),
              ),
          ),
-         doc='Allocate memory; byte-align on 8; pad size to multiple of 8.',
+         doc='Allocate memory; byte-align on 64; pad size to multiple of 64.',
      )),
     ('mju_free',
      FunctionDecl(
@@ -5208,6 +5316,28 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
          ),
          doc='Set res = 0.',
      )),
+    ('mju_fill',
+     FunctionDecl(
+         name='mju_fill',
+         return_type=ValueType(name='void'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='res',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum'),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='val',
+                 type=ValueType(name='mjtNum'),
+             ),
+             FunctionParameterDecl(
+                 name='n',
+                 type=ValueType(name='int'),
+             ),
+         ),
+         doc='Set res = val.',
+     )),
     ('mju_copy',
      FunctionDecl(
          name='mju_copy',
@@ -5594,6 +5724,36 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
          ),
          doc="Multiply transposed matrix and vector: res = mat' * vec.",
      )),
+    ('mju_mulVecMatVec',
+     FunctionDecl(
+         name='mju_mulVecMatVec',
+         return_type=ValueType(name='mjtNum'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='vec1',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='mat',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='vec2',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='n',
+                 type=ValueType(name='int'),
+             ),
+         ),
+         doc="Multiply square matrix with vectors on both sides: returns vec1' * mat * vec2.",  # pylint: disable=line-too-long
+     )),
     ('mju_transpose',
      FunctionDecl(
          name='mju_transpose',
@@ -5621,6 +5781,48 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
              ),
          ),
          doc="Transpose matrix: res = mat'.",
+     )),
+    ('mju_symmetrize',
+     FunctionDecl(
+         name='mju_symmetrize',
+         return_type=ValueType(name='void'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='res',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum'),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='mat',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='n',
+                 type=ValueType(name='int'),
+             ),
+         ),
+         doc="Symmetrize square matrix res = (mat + mat')/2.",
+     )),
+    ('mju_eye',
+     FunctionDecl(
+         name='mju_eye',
+         return_type=ValueType(name='void'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='mat',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum'),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='n',
+                 type=ValueType(name='int'),
+             ),
+         ),
+         doc='Set mat to the identity matrix.',
      )),
     ('mju_mulMatMat',
      FunctionDecl(
@@ -5895,7 +6097,7 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
                  ),
              ),
          ),
-         doc='Muiltiply quaternions.',
+         doc='Multiply quaternions.',
      )),
     ('mju_mulQuatAxis',
      FunctionDecl(
@@ -5924,7 +6126,7 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
                  ),
              ),
          ),
-         doc='Muiltiply quaternion and axis.',
+         doc='Multiply quaternion and axis.',
      )),
     ('mju_axisAngle2Quat',
      FunctionDecl(
@@ -6049,7 +6251,7 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
                  ),
              ),
          ),
-         doc='Convert 3D rotation matrix to quaterion.',
+         doc='Convert 3D rotation matrix to quaternion.',
      )),
     ('mju_derivQuat',
      FunctionDecl(
@@ -6104,7 +6306,7 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
                  type=ValueType(name='mjtNum'),
              ),
          ),
-         doc='Integrate quaterion given 3D angular velocity.',
+         doc='Integrate quaternion given 3D angular velocity.',
      )),
     ('mju_quatZ2Vec',
      FunctionDecl(
@@ -6366,6 +6568,128 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
          ),
          doc='Eigenvalue decomposition of symmetric 3x3 matrix.',
      )),
+    ('mju_boxQP',
+     FunctionDecl(
+         name='mju_boxQP',
+         return_type=ValueType(name='int'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='res',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum'),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='R',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum'),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='index',
+                 type=PointerType(
+                     inner_type=ValueType(name='int'),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='H',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='g',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='n',
+                 type=ValueType(name='int'),
+             ),
+             FunctionParameterDecl(
+                 name='lower',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='upper',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum', is_const=True),
+                 ),
+             ),
+         ),
+         doc="minimize 0.5*x'*H*x + x'*g  s.t. lower <= x <= upper, return rank or -1 if failed   inputs:     n           - problem dimension     H           - SPD matrix                n*n     g           - bias vector               n     lower       - lower bounds              n     upper       - upper bounds              n     res         - solution warmstart        n   return value:     nfree <= n  - rank of unconstrained subspace, -1 if failure   outputs (required):     res         - solution                  n     R           - subspace Cholesky factor  nfree*nfree    allocated: n*(n+7)   outputs (optional):     index       - set of free dimensions    nfree          allocated: n   notes:     the initial value of res is used to warmstart the solver     R must have allocatd size n*(n+7), but only nfree*nfree values are used in output     index (if given) must have allocated size n, but only nfree values are used in output     only the lower triangles of H and R and are read from and written to, respectively     the convenience function mju_boxQPmalloc allocates the required data structures",  # pylint: disable=line-too-long
+     )),
+    ('mju_boxQPmalloc',
+     FunctionDecl(
+         name='mju_boxQPmalloc',
+         return_type=ValueType(name='void'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='res',
+                 type=PointerType(
+                     inner_type=PointerType(
+                         inner_type=ValueType(name='mjtNum'),
+                     ),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='R',
+                 type=PointerType(
+                     inner_type=PointerType(
+                         inner_type=ValueType(name='mjtNum'),
+                     ),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='index',
+                 type=PointerType(
+                     inner_type=PointerType(
+                         inner_type=ValueType(name='int'),
+                     ),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='H',
+                 type=PointerType(
+                     inner_type=PointerType(
+                         inner_type=ValueType(name='mjtNum'),
+                     ),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='g',
+                 type=PointerType(
+                     inner_type=PointerType(
+                         inner_type=ValueType(name='mjtNum'),
+                     ),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='n',
+                 type=ValueType(name='int'),
+             ),
+             FunctionParameterDecl(
+                 name='lower',
+                 type=PointerType(
+                     inner_type=PointerType(
+                         inner_type=ValueType(name='mjtNum'),
+                     ),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='upper',
+                 type=PointerType(
+                     inner_type=PointerType(
+                         inner_type=ValueType(name='mjtNum'),
+                     ),
+                 ),
+             ),
+         ),
+         doc='allocate heap memory for box-constrained Quadratic Program   as in mju_boxQP, index, lower, and upper are optional   free all pointers with mju_free()',  # pylint: disable=line-too-long
+     )),
     ('mju_muscleGain',
      FunctionDecl(
          name='mju_muscleGain',
@@ -6573,6 +6897,26 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
          ),
          doc='Return max(a,b) with single evaluation of a and b.',
      )),
+    ('mju_clip',
+     FunctionDecl(
+         name='mju_clip',
+         return_type=ValueType(name='mjtNum'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='x',
+                 type=ValueType(name='mjtNum'),
+             ),
+             FunctionParameterDecl(
+                 name='min',
+                 type=ValueType(name='mjtNum'),
+             ),
+             FunctionParameterDecl(
+                 name='max',
+                 type=ValueType(name='mjtNum'),
+             ),
+         ),
+         doc='Clip x to the range [min, max].',
+     )),
     ('mju_sign',
      FunctionDecl(
          name='mju_sign',
@@ -6625,6 +6969,20 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
          ),
          doc='Convert type name to type id (mjtObj).',
      )),
+    ('mju_writeNumBytes',
+     FunctionDecl(
+         name='mju_writeNumBytes',
+         return_type=PointerType(
+             inner_type=ValueType(name='char', is_const=True),
+         ),
+         parameters=(
+             FunctionParameterDecl(
+                 name='nbytes',
+                 type=ValueType(name='size_t', is_const=True),
+             ),
+         ),
+         doc='Return human readable number of bytes using standard letter suffix.',  # pylint: disable=line-too-long
+     )),
     ('mju_warningText',
      FunctionDecl(
          name='mju_warningText',
@@ -6638,7 +6996,7 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
              ),
              FunctionParameterDecl(
                  name='info',
-                 type=ValueType(name='int'),
+                 type=ValueType(name='size_t'),
              ),
          ),
          doc='Construct a warning message given the warning type and info.',
@@ -6872,5 +7230,128 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
              ),
          ),
          doc='Sigmoid function over 0<=x<=1 constructed from half-quadratics.',
+     )),
+    ('mjd_transitionFD',
+     FunctionDecl(
+         name='mjd_transitionFD',
+         return_type=ValueType(name='void'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='m',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjModel', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='d',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjData'),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='eps',
+                 type=ValueType(name='mjtNum'),
+             ),
+             FunctionParameterDecl(
+                 name='centered',
+                 type=ValueType(name='mjtByte'),
+             ),
+             FunctionParameterDecl(
+                 name='A',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum'),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='B',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum'),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='C',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum'),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='D',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjtNum'),
+                 ),
+             ),
+         ),
+         doc='Finite differenced transition matrices (control theory notation)   d(x_next) = A*dx + B*du   d(sensor) = C*dx + D*du   required output matrix dimensions:      A: (2*nv+na x 2*nv+na)      B: (2*nv+na x nu)      D: (nsensordata x 2*nv+na)      C: (nsensordata x nu)',  # pylint: disable=line-too-long
+     )),
+    ('mjp_defaultPlugin',
+     FunctionDecl(
+         name='mjp_defaultPlugin',
+         return_type=ValueType(name='void'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='plugin',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjpPlugin'),
+                 ),
+             ),
+         ),
+         doc='Set default plugin definition.',
+     )),
+    ('mjp_registerPlugin',
+     FunctionDecl(
+         name='mjp_registerPlugin',
+         return_type=ValueType(name='int'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='plugin',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjpPlugin', is_const=True),
+                 ),
+             ),
+         ),
+         doc='Globally register a plugin. This function is thread-safe. If an identical mjpPlugin is already registered, this function does nothing. If a non-identical mjpPlugin with the same name is already registered, an mju_error is raised. Two mjpPlugins are considered identical if all member function pointers and numbers are equal, and the name and attribute strings are all identical, however the char pointers to the strings need not be the same.',  # pylint: disable=line-too-long
+     )),
+    ('mjp_pluginCount',
+     FunctionDecl(
+         name='mjp_pluginCount',
+         return_type=ValueType(name='int'),
+         parameters=(),
+         doc='Return the number of globally registered plugins.',
+     )),
+    ('mjp_getPlugin',
+     FunctionDecl(
+         name='mjp_getPlugin',
+         return_type=PointerType(
+             inner_type=ValueType(name='mjpPlugin', is_const=True),
+         ),
+         parameters=(
+             FunctionParameterDecl(
+                 name='name',
+                 type=PointerType(
+                     inner_type=ValueType(name='char', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='slot',
+                 type=PointerType(
+                     inner_type=ValueType(name='int'),
+                 ),
+             ),
+         ),
+         doc='Look up a plugin by name. If slot is not NULL, also write its registered slot number into it.',  # pylint: disable=line-too-long
+     )),
+    ('mjp_getPluginAtSlot',
+     FunctionDecl(
+         name='mjp_getPluginAtSlot',
+         return_type=PointerType(
+             inner_type=ValueType(name='mjpPlugin', is_const=True),
+         ),
+         parameters=(
+             FunctionParameterDecl(
+                 name='slot',
+                 type=ValueType(name='int'),
+             ),
+         ),
+         doc='Look up a plugin by the registered slot number that was returned by mjp_registerPlugin.',  # pylint: disable=line-too-long
      )),
 ])

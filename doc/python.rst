@@ -2,9 +2,6 @@
 Python Bindings
 ===============
 
-Introduction
-------------
-
 Starting with version 2.1.2, MuJoCo comes with native Python bindings that are developed in C++ using
 `pybind11 <https://pybind11.readthedocs.io/>`__. Unlike previous Python bindings, these are officially supported by the
 MuJoCo development team and will be kept up-to-date with the latest developments in MuJoCo itself.
@@ -155,6 +152,38 @@ Minimal example
        mujoco.mj_step(model, data)
        print(data.geom_xpos)
 
+.. _PyGUI:
+
+Interactive visualizer
+----------------------
+
+MuJoCo's interactive GUI (also known as the ``simulate`` application) is available as part of the Python package.
+Three distinct use cases are supported:
+
+- Launching as a standalone application:
+
+   * ``python -m mujoco.simulate`` launches an empty visualization session, where a model can be loaded by drag-and-drop.
+   * ``python -m mujoco.simulate --mjcf=/path/to/some/mjcf.xml`` launches a visualization session for the specified
+     model file.
+
+- Launching from a Python program/script -- import the module via ``from mujoco import simulate`` and launch the GUI
+  using one of the following invocations:
+
+   * ``simulate.launch()`` launches an empty visualization session, where a model can be loaded by drag-and-drop.
+   * ``simulate.launch(model)`` launches a visualzation session for the given ``mjModel`` where the visualizer
+     internally creates its own instance of ``mjData``
+   * ``simulate.launch(model, data)`` is the same as above, except that the visualizer operates directly on the given
+     ``mjData`` instance -- upon exit the ``data`` object will have been modified.
+
+- Launching from an interactive Python session (aka REPL): when working interactively either in a ``python`` or
+  ``ipython`` shell, the visualizer can be launched in a "passive" mode via ``simulate.launch_repl(model, data)``, where
+  the user remains in full control of modifying or stepping the physics. In this mode, the user can interact with the
+  visualizer using the mouse and keyboard as usual, however the physics will be frozen unless the user explicitly calls
+  ``mj_step`` (or perform any other modification of the ``mjData`` or ``mjModel``) in the REPL terminal. Note that since
+  the visualizer does not modify ``mjData`` in this mode, mouse-drag perturbations will not work unless the user
+  explicitly handles incoming GUI perturbation events in the REPL session.
+
+
 .. _PyNamed:
 
 Named access
@@ -168,13 +197,16 @@ various array members. For convenience and code readability, the Python bindings
 For each name category ``foo``, ``mujoco.MjModel`` and ``mujoco.MjData`` objects provide a method ``foo`` that takes
 a single string argument, and returns an accessor object for all arrays corresponding to the entity ``foo`` of the
 given name. The accessor object contains attributes whose names correspond to the fields of either ``mujoco.MjModel`` or
-``mujoco.MjData`` but with the part before the underscore removed. For example:
+``mujoco.MjData`` but with the part before the underscore removed. In addition, accessor objects also provide ``id`` and
+``name`` properties, which can be used as replacements for ``mj_name2id`` and ``mj_id2name`` respectively. For example:
 
 - ``m.geom('gizmo')`` returns an accessor for arrays in the ``MjModel`` object ``m`` associated with the geom named
   "gizmo".
 - ``m.geom('gizmo').rgba`` is a NumPy array view of length 4 that specifies the RGBA color for the geom.
   Specifically, it corresponds to the portion of ``m.geom_rgba[4*i:4*i+4]`` where
   ``i = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, 'gizmo')``.
+- ``m.geom('gizmo').id`` is the same number as returned by ``mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, 'gizmo')``.
+- ``m.geom(i).name`` is ``'gizmo'``, where ``i = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, 'gizmo')``.
 
 Additionally, the Python API define a number of aliases for some name categories corresponding to the XML element name
 in the MJCF schema that defines an entity of that category. For example, ``m.joint('foo')`` is the same as
@@ -241,7 +273,7 @@ to terminate the process, otherwise the behavior of MuJoCo after the callback re
 sufficient to ensure that error callbacks do not return *to MuJoCo*, but it is permitted to use
 `longjmp <https://en.cppreference.com/w/c/program/longjmp>`__ to skip MuJoCo's call stack back to the external callsite.
 
-The Python bindings utilises longjmp to allow it to convert irrecoverable MuJoCo errors into Python exceptions of type
+The Python bindings utilizes longjmp to allow it to convert irrecoverable MuJoCo errors into Python exceptions of type
 ``mujoco.FatalError`` that can be caught and processed in the usual Pythonic way. Furthermore, it installs its error
 callback in a thread-local manner using a currently private API, thus allowing for concurrent calls into MuJoCo from
 multiple threads.
@@ -273,7 +305,7 @@ Migration Notes for mujoco-py
 -----------------------------
 
 In mujoco-py, the main entry point is the `MjSim <https://github.com/openai/mujoco-py/blob/master/mujoco_py/mjsim.pyx>`_
-class.  Users constuct a stateful ``MjSim`` instance from an MJCF model (similar to ``dm_control.Physics``), and this
+class.  Users construct a stateful ``MjSim`` instance from an MJCF model (similar to ``dm_control.Physics``), and this
 instance holds references to an ``mjModel`` instance and its associated ``mjData``.  In contrast, the MuJoCo Python
 bindings (``mujoco``) take a more low-level approach, as explained above: following the design principle of the C
 library, the ``mujoco`` module itself is stateless, and merely wraps the underlying native structs and functions.

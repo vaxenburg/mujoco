@@ -25,8 +25,8 @@
 #include <vector>
 
 #include <absl/types/span.h>
-#include <mujoco.h>
-#include <mjxmacro.h>
+#include <mujoco/mujoco.h>
+#include <mujoco/mjxmacro.h>
 #include "indexers.h"
 #include "mjdata_meta.h"
 #include "raw.h"
@@ -92,38 +92,59 @@ class MjWrapper {};
 template <typename T>
 class StructListBase {
  public:
-  StructListBase(T* ptr, int num, pybind11::handle owner) : ptr_(ptr) {
-    for (int i = 0; i < num; ++i) {
-      wrappers_.push_back(std::make_shared<MjWrapper<T>>(&ptr[i], owner));
+  StructListBase(T* ptr, int num, pybind11::handle owner, bool lazy = false)
+      : ptr_(ptr), num_(num), owner_(owner) {
+    if (!lazy) {
+      PopulateUpTo(size());
     }
   }
 
   StructListBase(const StructListBase& other) = delete;
   StructListBase(StructListBase&& other) = default;
 
+  virtual ~StructListBase() = default;
+
   MjWrapper<T>& operator[](int i) {
-    if (i < 0 || i >= wrappers_.size()) {
+    if (i < 0 || i >= size()) {
       throw pybind11::index_error();
     }
+    PopulateUpTo(i);
     return *wrappers_[i];
   }
 
-  int size() const {
-    return wrappers_.size();
+  virtual int size() const {
+    return num_;
   }
 
+  T* get() const { return ptr_; }
+  pybind11::handle owner() const { return owner_; }
+
  protected:
+  void PopulateUpTo(int n) {
+    while (wrappers_.size() <= n) {
+      wrappers_.push_back(
+          std::make_shared<MjWrapper<T>>(&ptr_[wrappers_.size()], owner_));
+    }
+  }
+
   // Slicing
-  StructListBase(StructListBase& other, pybind11::slice slice) {
+  StructListBase(StructListBase& other, pybind11::slice slice)
+      : owner_(other.owner_) {
     pybind11::size_t start, stop, step, slicelength;
-    slice.compute(other.size(), &start, &stop, &step, &slicelength);
+    if (!slice.compute(other.size(), &start, &stop, &step, &slicelength)) {
+      throw pybind11::index_error();
+    }
+    other.PopulateUpTo(stop);
     ptr_ = &other.ptr_[start];
     for (int i = start; i < stop; i += step) {
       wrappers_.push_back(other.wrappers_[i]);
     }
+    num_ = wrappers_.size();
   }
 
   T* ptr_;
+  int num_;
+  pybind11::handle owner_;
 
   // Using shared_ptr here so that we get identical Python objects when slicing.
   std::vector<std::shared_ptr<MjWrapper<T>>> wrappers_;
@@ -277,6 +298,8 @@ class MjStructList<raw::MjWarningStat>
     : public StructListBase<raw::MjWarningStat> {
  public:
   MjStructList(raw::MjWarningStat* ptr, int num, pybind11::handle owner);
+  MjStructList(MjStructList&&) = default;
+  ~MjStructList() override = default;
 
   using StructListBase::operator[];
   using StructListBase::size;
@@ -325,6 +348,8 @@ template <>
 class MjStructList<raw::MjTimerStat> : public StructListBase<raw::MjTimerStat> {
  public:
   MjStructList(raw::MjTimerStat* ptr, int num, pybind11::handle owner);
+  MjStructList(MjStructList&&) = default;
+  ~MjStructList() override = default;
 
   using StructListBase::operator[];
   using StructListBase::size;
@@ -374,6 +399,8 @@ class MjStructList<raw::MjSolverStat>
     : public StructListBase<raw::MjSolverStat> {
  public:
   MjStructList(raw::MjSolverStat* ptr, int num, pybind11::handle owner);
+  MjStructList(MjStructList&&) = default;
+  ~MjStructList() override = default;
 
   using StructListBase::operator[];
   using StructListBase::size;
@@ -489,33 +516,28 @@ struct enable_if_mj_struct<raw::MjContact> { using type = void; };
 template <>
 class MjStructList<raw::MjContact> : public StructListBase<raw::MjContact> {
  public:
-  MjStructList(raw::MjContact* ptr, int num, pybind11::handle owner);
+  MjStructList(raw::MjContact* ptr, int nconmax,
+               int* ncon, pybind11::handle owner);
+  MjStructList(MjStructList&&) = default;
+  ~MjStructList() override = default;
 
   using StructListBase::operator[];
-  using StructListBase::size;
+
+  int size() const override {
+    if (ncon_) {
+      return *ncon_;
+    } else {
+      return StructListBase::size();
+    }
+  }
+
   MjStructList Slice(pybind11::slice slice) {
     return MjStructList(*this, slice);
   }
 
-#define X(type, var) pybind11::array_t<type> var
-  X(mjtNum, dist);
-  X(mjtNum, pos);
-  X(mjtNum, frame);
-  X(mjtNum, includemargin);
-  X(mjtNum, friction);
-  X(mjtNum, solref);
-  X(mjtNum, solimp);
-  X(mjtNum, mu);
-  X(mjtNum, H);
-  X(int, dim);
-  X(int, geom1);
-  X(int, geom2);
-  X(int, exclude);
-  X(int, efc_address);
-#undef X
-
  protected:
   MjStructList(MjStructList& other, pybind11::slice slice);
+  int* ncon_ = nullptr;
 };
 
 using MjContactList = MjStructList<raw::MjContact>;
@@ -539,6 +561,7 @@ class MjWrapper<raw::MjData>: public WrapperBase<raw::MjData> {
   MjWrapper(MjWrapper&&);
   ~MjWrapper();
 
+  const MjDataMetadata& metadata() const { return metadata_; }
   MjDataIndexer& indexer() { return indexer_; }
 
   void Serialize(std::ostream& output) const;
@@ -548,9 +571,12 @@ class MjWrapper<raw::MjData>: public WrapperBase<raw::MjData> {
       "__MUJOCO_STRUCTS_MJDATAWRAPPER_LOOKUP";
   static MjWrapper* FromRawPointer(raw::MjData* m) noexcept;
 
+
 #define X(dtype, var, dim0, dim1) py_array_or_tuple_t<dtype> var;
   MJDATA_POINTERS
 #undef X
+
+  py_array_or_tuple_t<mjContact> contact;
 
   py_array_or_tuple_t<raw::MjWarningStat> warning;
   py_array_or_tuple_t<raw::MjTimerStat> timer;
@@ -700,6 +726,7 @@ class MjWrapper<raw::MjvOption> : public WrapperBase<raw::MjvOption> {
   X(jointgroup);
   X(tendongroup);
   X(actuatorgroup);
+  X(skingroup);
   X(flags);
   #undef X
 };
@@ -894,7 +921,7 @@ static InitPyArray(Shape&& shape, T* buf, pybind11::handle owner) {
       out.append(InitPyArray(block_shape, &buf[i * block_size], owner));
     }
   }
-  return out;
+  return std::move(out);
 }
 
 // Same as above, but where we can determine array dimensions through the
@@ -971,6 +998,90 @@ static void DefinePyStr(pybind11::class_<C, O...> c, const char* name,
         rhs.copy(c.get()->*arr, actual_len);
         (c.get()->*arr)[actual_len] = '\0';
       });
+}
+
+// An equals operator that works for comparing numpy arrays too.
+// Unlike other objects, the equality operator for numpy arrays returns a
+// numpy array.
+inline bool FieldsEqual(pybind11::handle lhs, pybind11::handle rhs,
+                        pybind11::handle array_equal) {
+  // np.array_equal handles non-arrays.
+  return PyObject_IsTrue(array_equal(lhs, rhs).ptr());
+}
+
+// Returns an iterable object for iterating over attributes of T.
+template <typename T>
+pybind11::object Dir() {
+  pybind11::object type = pybind11::type::of<T>();
+  auto dir =
+      pybind11::reinterpret_steal<pybind11::object>(PyObject_Dir(type.ptr()));
+  if (PyErr_Occurred()) {
+    throw pybind11::error_already_set();
+  }
+  return dir;
+}
+
+// Returns true if all public fields in lhs and rhs are equal.
+template <typename T>
+bool StructsEqual(pybind11::object lhs, pybind11::object rhs) {
+  // Equivalent to the following python code:
+  // if type(lhs) != type(rhs):
+  //   return False
+  // for field in dir(lhs):
+  //   if field.startswith("_"):
+  //     continue
+  //   # equal() handles equality of numpy arrays
+  //   if not equal(getattr(lhs, field, None), getattr(rhs, field, None)):
+  //     return False
+  //
+  // return True
+
+  auto np = pybind11::module::import("numpy");
+  auto array_equal = np.attr("array_equal");
+
+  const pybind11::handle lhs_t = pybind11::type::handle_of(lhs);
+  const pybind11::handle rhs_t = pybind11::type::handle_of(rhs);
+  if (!lhs_t.is(rhs_t)) {
+    return false;
+  }
+  for (pybind11::handle f : Dir<T>()) {
+    auto name = f.cast<std::string_view>();
+
+    if (name.empty() || name[0] == '_') {
+      continue;
+    }
+    pybind11::object l = pybind11::getattr(lhs, f, pybind11::none());
+    pybind11::object r = pybind11::getattr(rhs, f, pybind11::none());
+    if (!FieldsEqual(l, r, array_equal)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// Returns a string representation of a struct like object.
+template <typename T>
+std::string StructRepr(pybind11::object self) {
+  std::ostringstream result;
+  result << "<"
+         << self.attr("__class__").attr("__name__").cast<std::string_view>();
+  for (pybind11::handle f : Dir<T>()) {
+    auto name = f.cast<std::string_view>();
+    if (name.empty() || name[0] == '_') {
+      continue;
+    }
+
+    result << "\n  " << name << ": "
+           << self.attr(f).attr("__repr__")().cast<std::string_view>();
+  }
+  result << "\n>";
+  return result.str();
+}
+
+template <typename C, typename... O>
+void DefineStructFunctions(pybind11::class_<C, O...> c) {
+  c.def("__eq__", StructsEqual<C>);
+  c.def("__repr__", StructRepr<C>);
 }
 
 }  // namespace mujoco::python

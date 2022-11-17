@@ -27,8 +27,9 @@ namespace Mujoco {
 
     protected override unsafe void OnBindToRuntime(MujocoLib.mjModel_* model, MujocoLib.mjData_* data) {
       if (WeldOffset) {
-        MjEngineTool.SetMjTransform(model->eq_data, WeldOffset.localPosition,
-                                    WeldOffset.localRotation, MujocoId);
+        MjEngineTool.SetMjTransform(
+            MjEngineTool.MjEqualityAtEntry(model->eq_data, MujocoId)+3,
+            WeldOffset.localPosition, WeldOffset.localRotation);
       }
     }
 

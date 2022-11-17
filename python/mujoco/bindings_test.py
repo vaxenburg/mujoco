@@ -34,7 +34,7 @@ TEST_XML = r"""
   </visual>
   <worldbody>
     <geom name="myplane" type="plane" size="10 10 1"/>
-    <body pos="0 0 0.1">
+    <body name="mybox" pos="0 0 0.1">
       <geom name="mybox" type="box" size="0.1 0.1 0.1" mass="0.25"/>
       <freejoint name="myfree"/>
     </body>
@@ -66,6 +66,14 @@ TEST_XML_SENSOR = r"""
     <user objtype="geom" objname="myplane"
           datatype="real" needstage="vel" dim="1"/>
   </sensor>
+</mujoco>
+"""
+
+TEST_XML_PLUGIN = r"""
+<mujoco model="test">
+  <extension>
+    <required plugin="mujoco.elasticity.cable"/>
+  </extension>
 </mujoco>
 """
 
@@ -163,6 +171,46 @@ class MuJoCoBindingsTest(parameterized.TestCase):
     self.data.actuator('myactuator').ctrl = 7
     np.testing.assert_array_equal(self.data.ctrl[actuator_id], [7])
 
+  def test_named_indexing_invalid_names_in_model(self):
+    with self.assertRaisesRegex(
+        KeyError,
+        r"Invalid name 'badgeom'\. Valid names: \['mybox', 'myplane'\]"):
+      self.model.geom('badgeom')
+
+  def test_named_indexing_no_name_argument_in_model(self):
+    with self.assertRaisesRegex(
+        KeyError,
+        r"Invalid name ''\. Valid names: \['myball', 'myfree', 'myhinge'\]"):
+      self.model.joint()
+
+  def test_named_indexing_invalid_names_in_data(self):
+    with self.assertRaisesRegex(
+        KeyError,
+        r"Invalid name 'badgeom'\. Valid names: \['mybox', 'myplane'\]"):
+      self.data.geom('badgeom')
+
+  def test_named_indexing_no_name_argument_in_data(self):
+    with self.assertRaisesRegex(
+        KeyError,
+        r"Invalid name ''\. Valid names: \['myball', 'myfree', 'myhinge'\]"):
+      self.data.jnt()
+
+  def test_named_indexing_invalid_index_in_model(self):
+    with self.assertRaisesRegex(
+        IndexError, r'Invalid index 3\. Valid indices from 0 to 2'):
+      self.model.geom(3)
+    with self.assertRaisesRegex(
+        IndexError, r'Invalid index -1\. Valid indices from 0 to 2'):
+      self.model.geom(-1)
+
+  def test_named_indexing_invalid_index_in_data(self):
+    with self.assertRaisesRegex(
+        IndexError, r'Invalid index 3\. Valid indices from 0 to 2'):
+      self.data.geom(3)
+    with self.assertRaisesRegex(
+        IndexError, r'Invalid index -1\. Valid indices from 0 to 2'):
+      self.data.geom(-1)
+
   def test_named_indexing_geom_size(self):
     box_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_GEOM, 'mybox')
     self.assertIs(self.model.geom('mybox'), self.model.geom(box_id))
@@ -222,6 +270,27 @@ class MuJoCoBindingsTest(parameterized.TestCase):
                                   np.reshape(range(36), (6, 6)))
     self.data.joint('myfree').cdof = 42
     np.testing.assert_array_equal(self.data.cdof[dof_idx:dof_idx+6], [[42]*6]*6)
+
+  def test_named_indexing_repr_in_data(self):
+    expected_repr = '''<_MjDataGeomViews
+  id: 1
+  name: 'mybox'
+  xmat: array([0., 0., 0., 0., 0., 0., 0., 0., 0.])
+  xpos: array([0., 0., 0.])
+>'''
+    self.assertEqual(expected_repr, repr(self.data.geom('mybox')))
+
+  def test_named_indexing_body_repr_in_data(self):
+    view_repr = repr(self.data.body('mybox'))
+    self.assertStartsWith(view_repr, '<_MjDataBodyViews')
+    self.assertIn('xpos: array([0., 0., 0.])', view_repr)
+    self.assertEndsWith(view_repr, '>')
+
+  def test_named_indexing_repr_in_model(self):
+    view_repr = repr(self.model.geom('mybox'))
+    self.assertStartsWith(view_repr, '<_MjModelGeomViews')
+    self.assertIn('size: array([0.1, 0.1, 0.1])', view_repr)
+    self.assertEndsWith(view_repr, '>')
 
   def test_addresses_differ_between_structs(self):
     model2 = mujoco.MjModel.from_xml_string(TEST_XML)
@@ -396,18 +465,22 @@ class MuJoCoBindingsTest(parameterized.TestCase):
 
     # Grab a reference to the contacts upfront so that we know that they're
     # a view into mjData rather than a copy.
-    contact = self.data.contact[:4]
+    contact = self.data.contact
 
     self.model.opt.timestep = 2**-9  # 0.001953125; allows exact comparisons
     self.assertEqual(self.data.time, 0)
     while self.data.time < expected_contact_time:
       self.assertEqual(self.data.ncon, 0)
+      self.assertEmpty(self.data.efc_type)
+      self.assertTrue(self.data.efc_type.flags['OWNDATA'])
       prev_time = self.data.time
       mujoco.mj_step(self.model, self.data)
       self.assertEqual(self.data.time, prev_time + self.model.opt.timestep)
 
     mujoco.mj_forward(self.model, self.data)
     self.assertEqual(self.data.ncon, 4)
+    self.assertLen(self.data.efc_type, 16)
+    self.assertFalse(self.data.efc_type.flags['OWNDATA'])
 
     # Sort contacts in anticlockwise order
     sorted_contact = sorted(
@@ -416,6 +489,11 @@ class MuJoCoBindingsTest(parameterized.TestCase):
     np.testing.assert_allclose(sorted_contact[1].pos[:2], [0.1, -0.1])
     np.testing.assert_allclose(sorted_contact[2].pos[:2], [0.1, 0.1])
     np.testing.assert_allclose(sorted_contact[3].pos[:2], [-0.1, 0.1])
+
+    mujoco.mj_resetData(self.model, self.data)
+    self.assertEqual(self.data.ncon, 0)
+    self.assertEmpty(self.data.efc_type)
+    self.assertTrue(self.data.efc_type.flags['OWNDATA'])
 
   def test_mj_step_multiple(self):
     self.model.opt.timestep = 2**-9  # 0.001953125; allows exact comparisons
@@ -427,24 +505,31 @@ class MuJoCoBindingsTest(parameterized.TestCase):
     self.assertIn('Optionally, repeat nstep times.', mujoco.mj_step.__doc__)
 
   def test_mj_contact_list(self):
-    self.assertLen(self.data.contact, self.model.nconmax)
+    self.assertEmpty(self.data.contact)
+
+    expected_ncon = 1234
+    self.data.ncon = expected_ncon
+    self.assertLen(self.data.contact, expected_ncon)
 
     expected_pos = []
     for contact in self.data.contact:
       expected_pos.append(np.random.uniform(size=3))
       contact.pos = expected_pos[-1]
+    self.assertLen(expected_pos, expected_ncon)
     np.testing.assert_array_equal(self.data.contact.pos, expected_pos)
 
     expected_friction = []
     for contact in self.data.contact:
       expected_friction.append(np.random.uniform(size=5))
       contact.friction = expected_friction[-1]
+    self.assertLen(expected_friction, expected_ncon)
     np.testing.assert_array_equal(self.data.contact.friction, expected_friction)
 
     expected_H = []  # pylint: disable=invalid-name
     for contact in self.data.contact:
       expected_H.append(np.random.uniform(size=36))
       contact.H = expected_H[-1]
+    self.assertLen(expected_H, expected_ncon)
     np.testing.assert_array_equal(self.data.contact.H, expected_H)
 
   def test_mj_struct_list_equality(self):
@@ -455,16 +540,16 @@ class MuJoCoBindingsTest(parameterized.TestCase):
     self.assertEqual(self.data.ncon, 4)
     mujoco.mj_forward(model2, data2)
     self.assertEqual(data2.ncon, 4)
-    self.assertEqual(data2.contact[:4], self.data.contact[:4])
+    self.assertEqual(data2.contact, self.data.contact)
 
     self.data.qpos[3:7] = [np.cos(np.pi/8), np.sin(np.pi/8), 0, 0]
     self.data.qpos[2] *= (np.sqrt(2) - 1) * 0.1 - 1e-6
     mujoco.mj_forward(self.model, self.data)
     self.assertEqual(self.data.ncon, 2)
-    self.assertNotEqual(data2.contact[:2], self.data.contact[:2])
+    self.assertNotEqual(data2.contact, self.data.contact)
 
     # Check that we can compare slices of different lengths
-    self.assertNotEqual(data2.contact[:2], self.data.contact[:4])
+    self.assertNotEqual(data2.contact, self.data.contact)
 
     # Check that comparing things of different types do not raise an error
     self.assertNotEqual(self.data.contact, self.data.warning)
@@ -527,6 +612,7 @@ class MuJoCoBindingsTest(parameterized.TestCase):
     class MjWarningStatSubclass(mujoco.MjWarningStat):
       # ptr attribute could cause an infinite recursion, if the repr
       # implementation simply looked at all attributes.
+
       @property
       def ptr(self):
         return self
@@ -538,6 +624,7 @@ class MuJoCoBindingsTest(parameterized.TestCase):
 >"""
 
     self.assertEqual(repr(MjWarningStatSubclass()), expected_repr)
+
   def test_mju_rotVecQuat(self):  # pylint: disable=invalid-name
     vec = [1, 0, 0]
     quat = [np.cos(np.pi/8), 0, 0, np.sin(np.pi/8)]
@@ -564,9 +651,13 @@ class MuJoCoBindingsTest(parameterized.TestCase):
     with self.assertRaises(TypeError):
       mujoco.mju_rotVecQuat(res, vec, [1, 2, 3])
 
+    # The following check needs to be done with a fully initialized array,
+    # since pybind11 prints out the array's contents when generating TypeErrors.
+    # Using `np.empty` here results in msan errors.
+
     # Check that the output argument must have the correct dtype.
     with self.assertRaises(TypeError):
-      mujoco.mju_rotVecQuat(vec, quat, res=np.empty(3, int))
+      mujoco.mju_rotVecQuat(vec, quat, res=np.zeros(3, int))
 
   def test_mj_jacSite(self):  # pylint: disable=invalid-name
     mujoco.mj_forward(self.model, self.data)
@@ -609,15 +700,19 @@ class MuJoCoBindingsTest(parameterized.TestCase):
       mujoco.mj_jacSite(
           self.model, self.data, None, np.empty((4, 7), jacr.dtype), site_id)
 
-    # Check that the jacp argument must have the right dtype.
-    with self.assertRaises(TypeError):
-      mujoco.mj_jacSite(
-          self.model, self.data, np.empty(jacp.shape, int), None, site_id)
+    # The following two checks need to be done with fully initialized arrays,
+    # since pybind11 prints out the array's contents when generating TypeErrors.
+    # Using `np.empty` here results in msan errors.
 
     # Check that the jacp argument must have the right dtype.
     with self.assertRaises(TypeError):
       mujoco.mj_jacSite(
-          self.model, self.data, None, np.empty(jacr.shape, int), site_id)
+          self.model, self.data, np.zeros(jacp.shape, int), None, site_id)
+
+    # Check that the jacr argument must have the right dtype.
+    with self.assertRaises(TypeError):
+      mujoco.mj_jacSite(
+          self.model, self.data, None, np.zeros(jacr.shape, int), site_id)
 
   def test_docstrings(self):  # pylint: disable=invalid-name
     self.assertEqual(
@@ -785,7 +880,7 @@ Euler integrator, semi-implicit in velocity.
 
   def test_can_raise_error(self):
     self.data.pstack = self.data.nstack
-    with self.assertRaisesWithLiteralMatch(mujoco.FatalError, 'Stack overflow'):
+    with self.assertRaisesRegex(mujoco.FatalError, r'\Astack overflow'):
       mujoco.mj_forward(self.model, self.data)
 
   def test_mjcb_time(self):
@@ -867,6 +962,23 @@ Euler integrator, semi-implicit in velocity.
     self.assertEqual(sensor_callback.count, 1)
     self.assertEqual(data_with_sensor.sensordata[0], 17)
 
+  def test_mjcb_control_not_leak_memory(self):
+    model_instances = []
+    data_instances = []
+    for _ in range(10):
+      mujoco.set_mjcb_control(None)
+      model_instances.append(mujoco.MjModel.from_xml_string('<mujoco/>'))
+      data_instances.append(mujoco.MjData(model_instances[-1]))
+      mujoco.set_mjcb_control(lambda m, d: None)
+      mujoco.mj_step(model_instances[-1], data_instances[-1])
+    mujoco.set_mjcb_control(None)
+    while data_instances:
+      d = data_instances.pop()
+      self.assertEqual(sys.getrefcount(d), 2)
+    while model_instances:
+      m = model_instances.pop()
+      self.assertEqual(sys.getrefcount(m), 2)
+
   def test_can_initialize_mjv_structs(self):
     self.assertIsInstance(mujoco.MjvScene(), mujoco.MjvScene)
     self.assertIsInstance(mujoco.MjvCamera(), mujoco.MjvCamera)
@@ -909,6 +1021,7 @@ Euler integrator, semi-implicit in velocity.
   def test_mj_ray(self):
     # mj_ray has tricky argument types
     geomid = np.zeros(1, np.int32)
+    mujoco.mj_forward(self.model, self.data)
     mujoco.mj_ray(self.model, self.data, [0, 0, 0], [0, 0, 1], None, 0, 0,
                   geomid)
     mujoco.mj_ray(self.model, self.data, [0, 0, 0], [0, 0, 1],
@@ -923,6 +1036,45 @@ Euler integrator, semi-implicit in velocity.
         flg_static=0,
         bodyexclude=0,
         geomid=geomid)
+
+  def test_mju_box_qp(self):
+    n = 5
+    res = np.zeros(n)
+    r = np.zeros((n, n+7))
+    index = np.zeros(n, np.int32)
+    h = np.eye(n)
+    g = np.ones((n,))
+    lower = -np.ones((n,))
+    upper = np.ones((n,))
+    rank = mujoco.mju_boxQP(res, r, index, h, g, lower, upper)
+    self.assertGreater(rank, -1)
+
+  def test_mju_fill(self):
+    res = np.empty(3, np.float64)
+    mujoco.mju_fill(res, 1.5)
+    np.testing.assert_array_equal(res, np.full(3, 1.5))
+
+  def test_mju_eye(self):
+    eye4 = np.empty((4, 4), np.float64)
+    mujoco.mju_eye(eye4)
+    np.testing.assert_array_equal(eye4, np.eye(4))
+
+  def test_mju_symmetrize(self):
+    mat = np.linspace(0, 1, 16).reshape(4, 4)
+    res = np.empty((4, 4), np.float64)
+    mujoco.mju_symmetrize(res, mat)
+    np.testing.assert_array_equal(res, 0.5*(mat + mat.T))
+
+  def test_mju_clip(self):
+    self.assertEqual(mujoco.mju_clip(1.5, 1.0, 2.0), 1.5)
+    self.assertEqual(mujoco.mju_clip(1.5, 2.0, 3.0), 2.0)
+    self.assertEqual(mujoco.mju_clip(1.5, 0.0, 1.0), 1.0)
+
+  def test_mju_mul_vec_mat_vec(self):
+    vec1 = np.array([1., 2., 3.])
+    vec2 = np.array([3., 2., 1.])
+    mat = np.array([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]])
+    self.assertEqual(mujoco.mju_mulVecMatVec(vec1, mat, vec2), 204.)
 
   @parameterized.product(flg_html=(False, True), flg_pad=(False, True))
   def test_mj_printSchema(self, flg_html, flg_pad):  # pylint: disable=invalid-name
@@ -950,6 +1102,48 @@ Euler integrator, semi-implicit in velocity.
     )
     self._assert_attributes_equal(model2, self.model, attr_to_compare)
 
+  def test_indexer_name_id(self):
+    xml = r"""
+<mujoco>
+  <worldbody>
+    <geom name="mygeom" size="1" pos="0 0 1"/>
+    <geom size="2" pos="0 0 2"/>
+    <geom size="3" pos="0 0 3"/>
+    <geom name="myothergeom" size="4" pos="0 0 4"/>
+    <geom size="5" pos="0 0 5"/>
+  </worldbody>
+</mujoco>
+"""
+
+    model = mujoco.MjModel.from_xml_string(xml)
+    self.assertEqual(model.geom('mygeom').id, 0)
+    self.assertEqual(model.geom('myothergeom').id, 3)
+    self.assertEqual(model.geom(0).name, 'mygeom')
+    self.assertEqual(model.geom(1).name, '')
+    self.assertEqual(model.geom(2).name, '')
+    self.assertEqual(model.geom(3).name, 'myothergeom')
+    self.assertEqual(model.geom(4).name, '')
+    self.assertEqual(model.geom(0).size[0], 1)
+    self.assertEqual(model.geom(1).size[0], 2)
+    self.assertEqual(model.geom(2).size[0], 3)
+    self.assertEqual(model.geom(3).size[0], 4)
+    self.assertEqual(model.geom(4).size[0], 5)
+
+    data = mujoco.MjData(model)
+    mujoco.mj_forward(model, data)
+    self.assertEqual(data.geom('mygeom').id, 0)
+    self.assertEqual(data.geom('myothergeom').id, 3)
+    self.assertEqual(data.geom(0).name, 'mygeom')
+    self.assertEqual(data.geom(1).name, '')
+    self.assertEqual(data.geom(2).name, '')
+    self.assertEqual(data.geom(3).name, 'myothergeom')
+    self.assertEqual(data.geom(4).name, '')
+    self.assertEqual(data.geom(0).xpos[2], 1)
+    self.assertEqual(data.geom(1).xpos[2], 2)
+    self.assertEqual(data.geom(2).xpos[2], 3)
+    self.assertEqual(data.geom(3).xpos[2], 4)
+    self.assertEqual(data.geom(4).xpos[2], 5)
+
   def _assert_attributes_equal(self, actual_obj, expected_obj, attr_to_compare):
     for name in attr_to_compare:
       actual_value = getattr(actual_obj, name)
@@ -962,6 +1156,9 @@ Euler integrator, semi-implicit in velocity.
       except AssertionError as e:
         self.fail("Attribute '{}' differs from expected value: {}".format(
             name, str(e)))
+
+  def test_load_plugin(self):
+    mujoco.MjModel.from_xml_string(TEST_XML_PLUGIN)
 
 if __name__ == '__main__':
   absltest.main()

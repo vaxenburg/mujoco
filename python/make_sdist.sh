@@ -21,21 +21,21 @@ fi
 # Figure out the path to this script (https://stackoverflow.com/a/246128).
 package_dir="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
-if [[ "$(uname)" == CYGWIN* ]]; then
+if [[ "$(uname)" == CYGWIN* || "$(uname)" == MINGW* ]]; then
   package_dir="$(cygpath -m ${package_dir})"
   readonly tmp_dir="$(TMPDIR="${LOCALAPPDATA//\\/$'/'}/Temp" mktemp -d)"
 else
   readonly tmp_dir="$(mktemp -d)"
 fi
 
-python -m pip install --upgrade pip setuptools
-python -m pip install absl-py
+python -m pip install --upgrade --require-hashes \
+    -r ${package_dir}/make_sdist_requirements.txt
 pushd ${tmp_dir}
 cp -r "${package_dir}"/* .
 
 # Generate header files.
 old_pythonpath="${PYTHONPATH}"
-if [[ "$(uname)" == CYGWIN* ]]; then
+if [[ "$(uname)" == CYGWIN* || "$(uname)" == MINGW* ]]; then
   export PYTHONPATH="${old_pythonpath};${package_dir}/.."
 else
   export PYTHONPATH="${old_pythonpath}:${package_dir}/.."
@@ -52,6 +52,9 @@ cp "${package_dir}"/../LICENSE .
 # Copy over CMake scripts.
 mkdir cmake
 cp "${package_dir}"/../cmake/*.cmake cmake
+
+# Copy over Simulate source code.
+cp -r "${package_dir}"/../simulate mujoco
 
 python setup.py sdist --formats=gztar
 tar -tf dist/mujoco-*.tar.gz

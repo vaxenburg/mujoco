@@ -8,9 +8,8 @@ Introduction
 aims to facilitate research and development in robotics, biomechanics, graphics and animation, machine learning, and
 other areas that demand fast and accurate simulation of articulated structures interacting with their environment.
 Initially developed by Roboti LLC, it was acquired and made `freely available
-<https://github.com/deepmind/mujoco/blob/main/LICENSE>`__ by DeepMind in October 2021, with the goal of making MuJoCo an
-open-source project. The MuJoCo codebase will be made available at the `deepmind/mujoco
-<https://github.com/deepmind/mujoco>`__ repository on GitHub.
+<https://github.com/deepmind/mujoco/blob/main/LICENSE>`__ by DeepMind in October 2021, and open sourced in May 2022.
+The MuJoCo codebase is available at the `deepmind/mujoco <https://github.com/deepmind/mujoco>`__ repository on GitHub.
 
 MuJoCo is a C/C++ library with a C API, intended for researchers and developers. The runtime simulation module is tuned
 to maximize performance and operates on low-level data structures which are preallocated by the built-in XML parser and
@@ -120,8 +119,8 @@ Powerful yet intuitive modeling language
    MuJoCo has its own modeling language called MJCF. The goal of MJCF is to provide access to all of MuJoCo's compute
    capabilities, and at the same time enable users to develop new models quickly and experiment with them. This goal is
    achieved in large part due to an extensive :ref:`default setting <CDefault>` mechanism that resembles Cascading Style
-   Sheets (CSS) in HTML. While MJCF has many elements and attributes, the user needs to set surprisingly few of them in
-   any given model. This makes MJCF files shorter and more readable than many other formats.
+   Sheets (CSS) inlined in HTML. While MJCF has many elements and attributes, the user needs to set surprisingly few of
+   them in any given model. This makes MJCF files shorter and more readable than many other formats.
 
 Automated generation of composite flexible objects
    MuJoCo's soft constraints can be used to model ropes, cloth, and deformable 3D objects. This requires a large
@@ -178,14 +177,14 @@ objects and cast shadows, and a floating box with 6 DOFs (this is what the "free
 .. code:: xml
 
    <mujoco>
-      <worldbody>
-         <light diffuse=".5 .5 .5" pos="0 0 3" dir="0 0 -1"/>
-         <geom type="plane" size="1 1 0.1" rgba=".9 0 0 1"/>
-         <body pos="0 0 1">
-            <joint type="free"/>
-            <geom type="box" size=".1 .2 .3" rgba="0 .9 0 1"/>
-         </body>
-      </worldbody>
+     <worldbody>
+       <light diffuse=".5 .5 .5" pos="0 0 3" dir="0 0 -1"/>
+       <geom type="plane" size="1 1 0.1" rgba=".9 0 0 1"/>
+       <body pos="0 0 1">
+         <joint type="free"/>
+         <geom type="box" size=".1 .2 .3" rgba="0 .9 0 1"/>
+       </body>
+     </worldbody>
    </mujoco>
 
 The built-in OpenGL visualizer renders this model as:
@@ -245,43 +244,46 @@ Next we provide a more elaborate example illustrating several features of MJCF.
 .. code:: xml
 
    <mujoco model="example">
-       <compiler coordinate="global"/>
-       <default>
-           <geom rgba=".8 .6 .4 1"/>
-       </default>
-       <asset>
-           <texture type="skybox" builtin="gradient" rgb1="1 1 1" rgb2=".6 .8 1"
-                    width="256" height="256"/>
-       </asset>
-       <worldbody>
-           <light pos="0 1 1" dir="0 -1 -1" diffuse="1 1 1"/>
+     <compiler coordinate="global"/>
+
+     <default>
+       <geom rgba=".8 .6 .4 1"/>
+     </default>
+
+     <asset>
+       <texture type="skybox" builtin="gradient" rgb1="1 1 1" rgb2=".6 .8 1" width="256" height="256"/>
+     </asset>
+
+     <worldbody>
+       <light pos="0 1 1" dir="0 -1 -1" diffuse="1 1 1"/>
+       <body>
+         <geom type="capsule" fromto="0 0 1  0 0 0.6" size="0.06"/>
+         <joint type="ball" pos="0 0 1"/>
+         <body>
+           <geom type="capsule" fromto="0 0 0.6  0.3 0 0.6" size="0.04"/>
+           <joint type="hinge" pos="0 0 0.6" axis="0 1 0"/>
+           <joint type="hinge" pos="0 0 0.6" axis="1 0 0"/>
            <body>
-               <geom type="capsule" fromto="0 0 1  0 0 0.6" size="0.06"/>
-               <joint type="ball" pos="0 0 1"/>
-               <body>
-                   <geom type="capsule" fromto="0 0 0.6  0.3 0 0.6" size="0.04"/>
-                   <joint type="hinge" pos="0 0 0.6" axis="0 1 0"/>
-                   <joint type="hinge" pos="0 0 0.6" axis="1 0 0"/>
-                   <body>
-                       <geom type="ellipsoid" pos="0.4 0 0.6" size="0.1 0.08 0.02"/>
-                       <site name="end1" pos="0.5 0 0.6" type="sphere" size="0.01"/>
-                       <joint type="hinge" pos="0.3 0 0.6" axis="0 1 0"/>
-                       <joint type="hinge" pos="0.3 0 0.6" axis="0 0 1"/>
-                   </body>
-               </body>
+             <geom type="ellipsoid" pos="0.4 0 0.6" size="0.1 0.08 0.02"/>
+             <site name="end1" pos="0.5 0 0.6" type="sphere" size="0.01"/>
+             <joint type="hinge" pos="0.3 0 0.6" axis="0 1 0"/>
+             <joint type="hinge" pos="0.3 0 0.6" axis="0 0 1"/>
            </body>
-           <body>
-               <geom type="cylinder" fromto="0.5 0 0.2  0.5 0 0" size="0.07"/>
-               <site name="end2" pos="0.5 0 0.2" type="sphere" size="0.01"/>
-               <joint type="free"/>
-           </body>
-       </worldbody>
-       <tendon>
-           <spatial limited="true" range="0 0.6" width="0.005">
-               <site site="end1"/>
-               <site site="end2"/>
-           </spatial>
-       </tendon>
+         </body>
+       </body>
+       <body>
+         <geom type="cylinder" fromto="0.5 0 0.2  0.5 0 0" size="0.07"/>
+         <site name="end2" pos="0.5 0 0.2" type="sphere" size="0.01"/>
+         <joint type="free"/>
+       </body>
+     </worldbody>
+
+     <tendon>
+       <spatial limited="true" range="0 0.6" width="0.005">
+         <site site="end1"/>
+         <site site="end2"/>
+       </spatial>
+     </tendon>
    </mujoco>
 
 .. raw:: html
@@ -354,7 +356,6 @@ purpose of including an asset is to reference it, and referencing can only be do
 undefined.
 
 Mesh
-
    MuJoCo can load triangulated meshes from OBJ files and binary STL. Software such as `MeshLab
    <https://www.meshlab.net/>`__ can be used to convert from other formats. While any collection of triangles can be
    loaded and visualized as a mesh, the collision detector works with the convex hull. There are compile-time options
@@ -377,11 +378,11 @@ Height field
    format described later. A height field is a rectangular grid of elevation data. The compiler normalizes the data to
    the range [0-1]. The actual spatial extent of the height field is then determined by the size parameters of the
    referencing geom. Height fields can only be referenced from geoms that are attached to the world body. For rendering
-   and collision detection purposes, the grid rectangles are automatically triangulated, thus the height field is treated
-   as a union of triangular prisms. Collision detection with such a composite object can in principle generate a large
-   number of contact points for a single geom pair. If that happens, only the first 64 contact points are kept. The
-   rationale is that height fields should be used to model terrain maps whose spatial features are large compared to the
-   other objects in the simulation, so the number of contacts will be small for well-designed models.
+   and collision detection purposes, the grid rectangles are automatically triangulated, thus the height field is
+   treated as a union of triangular prisms. Collision detection with such a composite object can in principle generate a
+   large number of contact points for a single geom pair. If that happens, only the first 64 contact points are kept.
+   The rationale is that height fields should be used to model terrain maps whose spatial features are large compared to
+   the other objects in the simulation, so the number of contacts will be small for well-designed models.
 
 Texture
    Textures can be loaded from PNG files or synthesized by the compiler based on user-defined procedural parameters.
@@ -485,8 +486,8 @@ Reference pose
    of the joints when the model is in its initial configuration. In our earlier example the elbow was created in a bent
    configuration at 90° angle. But MuJoCo does not know what an elbow is, and so by default it treats this joint
    configuration as having numeric value of 0. We can override the default behavior and specify that the initial
-   configuration corresponds to 90°, using the ref attribute of :ref:`joint <joint>`. The reference values of all joints
-   are assembled into the vector ``mjModel.qpos0``. Whenever the simulation is reset, the joint configuration
+   configuration corresponds to 90°, using the ref attribute of :ref:`joint <body-joint>`. The reference values of all
+   joints are assembled into the vector ``mjModel.qpos0``. Whenever the simulation is reset, the joint configuration
    ``mjData.qpos`` is set to ``mjModel.qpos0``. At runtime the joint position vector is interpreted relative to the
    reference pose. In particular, the amount of spatial transformation applied by the joints is ``mjData.qpos -
    mjModel.qpos0``. This transformation is in addition to the parent-child translation and rotation offsets stored in
@@ -531,8 +532,7 @@ Sensor
    are copied from the corresponding fields of ``mjData``. There is also a user sensor, allowing user code to insert any
    other quantity of interest in the sensor data array. MuJoCo also has off-screen rendering capabilities, making it
    straightforward to simulate both color and depth camera sensors. This is not included in the standard sensor model
-   and instead has to be done programmatically, as illustrated in the code sample `simulate.cc
-   <https://github.com/deepmind/mujoco/blob/main/sample/simulate.cc>`_.
+   and instead has to be done programmatically, as illustrated in the code sample :ref:`simulate.cc <saSimulate>`.
 
 Equality
    Equality constraints can impose additional constraints beyond those already imposed by the kinematic tree structure
@@ -602,7 +602,7 @@ Divergence of a simulation happens when elements of the state tend quickly to in
 manifested as an :ref:`mjWARN_BADQACC<mjtwarning>` warning. Divergence is endemic to all physics simulation and is not
 necessarily indicative of a bad model or bug in the simulator, but is rather a hint that the timestep  is too large for
 the given choice of integrator. In physics simulation there is always a tension between speed (large time steps) and
-stabillity (small timesteps). A model which is well-tuned for speed has the largest possible timestep that does not
+stability (small timesteps). A model which is well-tuned for speed has the largest possible timestep that does not
 diverge, which usually means that it *can* be made to diverge under extreme conditions. In that sense *rare* cases of
 divergence can actually be indicative of a well-tuned model. In all cases it should be possible to prevent divergence by
 reducing the timestep and/or switching to a more stable :ref:`integrator <geIntegration>`. If that fails, the culprit is
@@ -628,8 +628,8 @@ That said, users are encouraged to use MKS, as there are two places where MuJoCo
 - The default value of :ref:`gravity<option>` is (0, 0, -9.81), which corresponds to Earth surface gravity in MKS.
   Note that this does not really define system of units to be MKS, since we might be using CGS on
   `Enceladus <https://en.wikipedia.org/wiki/Enceladus>`__.
-- The default value of :ref:`geom density<geom>` (used to infer body masses and inertias) is 1000, which corresponds to
-  the density of water in MKS.
+- The default value of :ref:`geom density<body-geom>` (used to infer body masses and inertias) is 1000, which
+  corresponds to the density of water in MKS.
 
 Once a consistent system of basic units (length, mass, time) is chosen, all derived units correspond to this system, as
 in `Dimensional Analysis <https://en.wikipedia.org/wiki/Dimensional_analysis>`__. For example if our model is
@@ -639,6 +639,33 @@ interpreted as MKS, then forces and torques are in Newton and Newton-Meter, resp
 :ref:`default <compiler>`), internally all angles are `Radians <https://en.wikipedia.org/wiki/Radian>`__. So e.g., if we
 are using MKS, angular velocities reported by :ref:`gyroscopes<sensor-gyro>` would be in rad/s while stiffness of hinge
 joints would be in Nm/rad.
+
+
+.. _SurprisingCollisions:
+
+Surprising Collisions
+~~~~~~~~~~~~~~~~~~~~~
+
+MuJoCo by default excludes collisions between geoms that belong to body pairs which have a direct parent-child
+relationship. For example, consider the arm model in the :ref:`Examples` section above: there is no collision at the
+"elbow" even though the capsule geoms are penetrating, because the forearm is an immediate child of the upper arm.
+
+However, this exclusion is **not applied if the parent is a static body** i.e., the world body, or a body without any
+degrees of freedom relative to the world body. This behavior, documented in the :ref:`Collision detection<Collision>`
+section, prevents objects from falling through the floor or moving through walls. However, this behavior often leads to
+the following situation:
+
+The user comments out the root joint of a floating-base model, perhaps in order to prevent it from falling; now that the
+base body is counted as static, new collisions appear that were not there before and the user is confused. There are two
+easy ways to avoid this problem:
+
+1. Don't remove the root joint. Perhaps it is enough to :ref:`disable gravity<option-flag>` and possibly add some
+   :ref:`fluid viscosity<option>` in order to prevent your model from moving around too much.
+
+2. Use :ref:`collision filtering<Collision>` to explicitly disable the unwanted collisions, either by setting the
+   relevant :at:`contype` and :at:`conaffinity` attributes, or by using a contact :ref:`exclude <contact-exclude>`
+   directive.
+
 
 .. _NotObject:
 
@@ -706,10 +733,10 @@ The size of each array (``njnt`` in this case) is also given in ``mjModel``. The
 first, followed by the limits of the second joint etc. This ordering reflects the fact that all matrices in MuJoCo have
 row-major format.
 
-The available element types are defined in
-`mjmodel.h <https://github.com/deepmind/mujoco/blob/main/include/mjmodel.h#L243>`_, in the enum type :ref:`mjtObj`.
-These enums are mostly used internally. One exception are the functions :ref:`mj_name2id` and :ref:`mj_id2name` in the
-MuJoCo API, which map element names to integer ids and vice versa. These functions take an element type as input.
+The available element types are defined in `mjmodel.h
+<https://github.com/deepmind/mujoco/blob/main/include/mujoco/mjmodel.h#L243>`_, in the enum type :ref:`mjtObj`. These
+enums are mostly used internally. One exception are the functions :ref:`mj_name2id` and :ref:`mj_id2name` in the MuJoCo
+API, which map element names to integer ids and vice versa. These functions take an element type as input.
 
 Naming model elements in the XML is optional. Two elements of the same type (e.g. two joints) cannot have the same name.
 Naming is required only when a given element needs to be referenced elsewhere in the model; referencing in the XML can
@@ -761,8 +788,8 @@ properties.
 Sites are light geoms. They have the same appearance properties but cannot participate in collisions and cannot be used
 to infer body masses. On the other hand sites can do things that geoms cannot do: they can specify the volumes of touch
 sensors, the attachment of IMU sensors, the routing of spatial tendons, the end-points of slider-crank actuators. These
-are all spatial quantities, and yet they do not correspond to entities that should have mass or collide other entities -
-which is why the site element was created. Sites can also be used to specify points (or rather frames) of interest to
+are all spatial quantities, and yet they do not correspond to entities that should have mass or collide other entities
+-- which is why the site element was created. Sites can also be used to specify points (or rather frames) of interest to
 the user.
 
 The following example illustrates the point that multiple sites and geoms can be attached to the same body: two sites

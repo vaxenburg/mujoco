@@ -15,8 +15,10 @@
 #ifndef MUJOCO_PYTHON_MJDATA_META_H_
 #define MUJOCO_PYTHON_MJDATA_META_H_
 
-#include <mjxmacro.h>
+#include <mujoco/mujoco.h>
+#include <mujoco/mjxmacro.h>
 #include "raw.h"
+#include "util/crossplatform.h"
 
 namespace mujoco::python {
 namespace _impl {
@@ -73,6 +75,8 @@ struct MjDataMetadata {
   MJDATA_METADATA
 #undef X
 
+  bool is_dual;
+
  private:
   MjDataMetadata() = default;
   MjDataMetadata(const MjDataMetadata& other) = default;
@@ -93,9 +97,7 @@ struct MjDataMetadata {
 
         MJDATA_METADATA
 #undef X
-        dummy_() {}
-
-  bool dummy_;  // Dummy variable to terminate X macro sequences.
+        is_dual(mj_isDual(m)) {}
 };
 
 }  // namespace mujoco::python
